@@ -694,17 +694,8 @@ document.querySelectorAll('.testi-card').forEach((card,i) => {
 });
 /* === END LASER === */
 
-/* Smart Telegram opener — tries app first, falls back to web */
 function openTelegram() {
-  const appLink = 'tg://resolve?domain=alpha1prompts';
-  const webLink = 'https://t.me/alpha1prompts';
-  const start = Date.now();
-  window.location = appLink;
-  setTimeout(() => {
-    if(Date.now() - start < 1500) {
-      window.open(webLink, '_blank');
-    }
-  }, 600);
+  window.open('https://t.me/alpha1prompts', '_blank');
 }
 
 const faqs = [
