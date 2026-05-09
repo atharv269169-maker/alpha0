@@ -484,10 +484,20 @@ document.querySelectorAll('[data-count]').forEach(el => {
 let wlCount = 247;
 setInterval(() => { if(Math.random()>.7){wlCount++;const e=document.getElementById('wl-count');if(e)e.textContent=wlCount;} }, 9000);
 
-function joinWaitlist() {
+async function joinWaitlist() {
   const emailEl = document.getElementById('email-input');
   const email = emailEl.value;
   if(!email||!email.includes('@')){emailEl.style.outline='1px solid #ff2f7b';setTimeout(()=>emailEl.style.outline='',1200);return;}
+
+  // send to Formspree
+  try {
+    await fetch('https://formspree.io/f/mojrpvez', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ email: email, source: 'Alpha1 Waitlist' })
+    });
+  } catch(err) { console.log('Formspree error:', err); }
+
   // show thank you modal
   const name = email.split('@')[0];
   document.getElementById('ty-name').textContent = name;
