@@ -68,25 +68,73 @@
 
     #features { background: var(--bg2); }
     .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 60px; }
-    .feature-card { background: var(--card); border: 1px solid var(--border); padding: 36px 28px; position: relative; overflow: hidden; transition: all .4s; cursor: default; }
+
+    /* === 3D CARD STYLES === */
+    .feature-card {
+      background: var(--card); border: 1px solid var(--border); padding: 36px 28px;
+      position: relative; overflow: hidden;
+      transition: box-shadow .4s, border-color .4s;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
     .feature-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--neon), var(--neon2)); transform: scaleX(0); transform-origin: left; transition: transform .4s; }
-    .feature-card:hover { border-color: rgba(0,240,255,0.4); transform: translateY(-8px); box-shadow: 0 20px 60px rgba(0,240,255,0.1); }
+    .feature-card:hover { border-color: rgba(0,240,255,0.4); box-shadow: 0 20px 60px rgba(0,240,255,0.15), 0 0 0 1px rgba(0,240,255,0.1); }
     .feature-card:hover::before { transform: scaleX(1); }
+    .feature-card.expanded { border-color: rgba(0,240,255,0.5); box-shadow: 0 24px 70px rgba(0,240,255,0.2); }
+    .feature-card.expanded::before { transform: scaleX(1); }
+
     .feature-icon { font-size: 2.2rem; margin-bottom: 20px; display: block; filter: drop-shadow(0 0 8px rgba(0,240,255,0.5)); }
     .feature-num { position: absolute; top: 20px; right: 24px; font-family: 'Orbitron', monospace; font-size: 0.65rem; color: rgba(0,240,255,0.18); font-weight: 900; }
     .feature-title { font-family: 'Orbitron', monospace; font-size: 0.95rem; font-weight: 700; margin-bottom: 12px; color: var(--text); }
     .feature-desc { color: var(--muted); font-size: 0.88rem; line-height: 1.65; }
 
+    /* expand arrow */
+    .feature-arrow { display: block; margin-top: 14px; font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 2px; color: rgba(0,240,255,0.4); transition: color .3s; }
+    .feature-card:hover .feature-arrow, .feature-card.expanded .feature-arrow { color: var(--neon); }
+    .feature-arrow span { display: inline-block; transition: transform .3s; }
+    .feature-card.expanded .feature-arrow span { transform: rotate(180deg); }
+
+    /* expand content */
+    .feature-expand { max-height: 0; overflow: hidden; transition: max-height .5s ease, opacity .4s ease; opacity: 0; }
+    .feature-card.expanded .feature-expand { max-height: 200px; opacity: 1; }
+    .feature-expand-inner { border-top: 1px solid rgba(0,240,255,0.1); margin-top: 16px; padding-top: 16px; color: #8aaabb; font-size: 0.85rem; line-height: 1.75; }
+    /* === END 3D CARD STYLES === */
+
     #testimonials { background: var(--bg); }
     .testi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 60px; }
-    .testi-card { background: var(--card); border: 1px solid var(--border); padding: 32px 28px; position: relative; transition: all .35s; }
-    .testi-card:hover { border-color: rgba(123,47,255,0.5); box-shadow: 0 20px 50px rgba(123,47,255,0.12); transform: translateY(-4px); }
+    .testi-card {
+      background: var(--card); padding: 32px 28px; position: relative;
+      transition: transform .35s, box-shadow .35s;
+      border: 1px solid transparent;
+      overflow: hidden;
+    }
+    .testi-card:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 24px 60px rgba(123,47,255,0.18); }
+    /* laser SVG border overlay */
+    .testi-card .laser-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
     .stars { color: var(--neon); font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 16px; }
     .testi-text { font-size: 0.95rem; line-height: 1.75; color: var(--text); margin-bottom: 24px; font-style: italic; }
     .testi-author { display: flex; align-items: center; gap: 14px; }
     .testi-avatar { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, var(--neon), var(--neon2)); display: flex; align-items: center; justify-content: center; font-family: 'Orbitron', monospace; font-weight: 900; font-size: 0.78rem; color: var(--bg); flex-shrink: 0; }
     .testi-name { font-weight: 700; font-size: 0.9rem; }
     .testi-role { font-size: 0.72rem; color: var(--muted); margin-top: 3px; }
+
+    /* === THANK YOU MODAL === */
+    #ty-modal {
+      display: none; position: fixed; inset: 0; z-index: 9000;
+      background: rgba(2,4,8,0.95); backdrop-filter: blur(16px);
+      align-items: center; justify-content: center; flex-direction: column;
+      text-align: center;
+    }
+    #ty-modal.show { display: flex; animation: fadeUp .5s ease; }
+    #ty-canvas { position: absolute; inset: 0; pointer-events: none; }
+    .ty-inner { position: relative; z-index: 1; max-width: 520px; padding: 0 2rem; }
+    .ty-icon { font-size: 4rem; margin-bottom: 1.5rem; animation: float 3s ease-in-out infinite; display: block; }
+    .ty-title { font-family: 'Orbitron', monospace; font-size: clamp(1.8rem, 5vw, 3rem); font-weight: 900; margin-bottom: 1rem; background: linear-gradient(90deg, var(--neon), var(--neon2), var(--neon3), var(--neon)); background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: gradientShift 3s linear infinite; }
+    .ty-sub { font-size: 1rem; color: var(--muted); line-height: 1.75; margin-bottom: 2rem; }
+    .ty-badge { display: inline-flex; align-items: center; gap: 8px; font-family: 'Space Mono', monospace; font-size: 0.68rem; letter-spacing: 3px; color: var(--neon); border: 1px solid rgba(0,240,255,0.25); padding: 8px 20px; background: rgba(0,240,255,0.05); margin-bottom: 2rem; }
+    .ty-close { background: transparent; border: 1px solid rgba(0,240,255,0.3); color: var(--neon); padding: 12px 32px; font-family: 'Orbitron', monospace; font-size: 0.72rem; letter-spacing: 2px; cursor: none; text-transform: uppercase; transition: all .3s; }
+    .ty-close:hover { background: var(--neon); color: var(--bg); box-shadow: var(--glow); }
 
     #waitlist { background: var(--bg2); text-align: center; }
     #waitlist::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(0,240,255,0.04), transparent 70%); pointer-events: none; }
@@ -228,12 +276,61 @@
   <h2 class="section-title reveal">Built Different.<br/>Built for <span style="color:var(--neon)">Tomorrow.</span></h2>
   <p class="section-sub reveal">Alpha1 combines cutting-edge AI with an intuitive interface to give you superpowers you never thought possible.</p>
   <div class="features-grid">
-    <div class="feature-card reveal"><span class="feature-num">01</span><span class="feature-icon">🧠</span><div class="feature-title">Adaptive AI Engine</div><div class="feature-desc">Our AI learns your patterns and adapts in real time — giving smarter responses the more you use it.</div></div>
-    <div class="feature-card reveal"><span class="feature-num">02</span><span class="feature-icon">⚡</span><div class="feature-title">Lightning Execution</div><div class="feature-desc">Zero latency workflows. Your ideas go from thought to output in milliseconds, not minutes.</div></div>
-    <div class="feature-card reveal"><span class="feature-num">03</span><span class="feature-icon">🔒</span><div class="feature-title">Privacy First</div><div class="feature-desc">End-to-end encrypted. Your data is yours alone. We never train on your inputs without consent.</div></div>
-    <div class="feature-card reveal"><span class="feature-num">04</span><span class="feature-icon">🌐</span><div class="feature-title">Real-Time Web Intel</div><div class="feature-desc">Connected to live data streams. Alpha1 knows what's happening right now, not just what it was trained on.</div></div>
-    <div class="feature-card reveal"><span class="feature-num">05</span><span class="feature-icon">🎯</span><div class="feature-title">Precision Automation</div><div class="feature-desc">Build complex automations with natural language. No code needed — just describe what you want.</div></div>
-    <div class="feature-card reveal"><span class="feature-num">06</span><span class="feature-icon">🚀</span><div class="feature-title">One-Click Deploy</div><div class="feature-desc">Push your AI projects live instantly. From idea to production with a single click.</div></div>
+
+    <div class="feature-card reveal">
+      <span class="feature-num">01</span>
+      <span class="feature-icon">🧠</span>
+      <div class="feature-title">Adaptive AI Engine</div>
+      <div class="feature-desc">Our AI learns your patterns and adapts in real time — giving smarter responses the more you use it.</div>
+      <span class="feature-arrow">▼ <span>▼</span> LEARN MORE</span>
+      <div class="feature-expand"><div class="feature-expand-inner">Alpha1's core engine continuously monitors how you work — your prompts, your preferences, your workflows. Over time it builds a personal model of you, delivering responses that feel tailor-made. The more you use it, the smarter it gets. No retraining, no configuration — just intelligence that evolves with you automatically.</div></div>
+    </div>
+
+    <div class="feature-card reveal">
+      <span class="feature-num">02</span>
+      <span class="feature-icon">⚡</span>
+      <div class="feature-title">Lightning Execution</div>
+      <div class="feature-desc">Zero latency workflows. Your ideas go from thought to output in milliseconds, not minutes.</div>
+      <span class="feature-arrow">▼ <span>▼</span> LEARN MORE</span>
+      <div class="feature-expand"><div class="feature-expand-inner">Alpha1 is built on a globally distributed inference network with sub-50ms response times. Our pipeline eliminates queue delays using predictive pre-loading. Whether you're running a quick prompt or a complex multi-step automation, you get results before you've even finished thinking. Speed isn't a feature — it's the foundation.</div></div>
+    </div>
+
+    <div class="feature-card reveal">
+      <span class="feature-num">03</span>
+      <span class="feature-icon">🔒</span>
+      <div class="feature-title">Privacy First</div>
+      <div class="feature-desc">End-to-end encrypted. Your data is yours alone. We never train on your inputs without consent.</div>
+      <span class="feature-arrow">▼ <span>▼</span> LEARN MORE</span>
+      <div class="feature-expand"><div class="feature-expand-inner">Every request is encrypted end-to-end using AES-256 and never persisted on our servers beyond your session. We operate under a strict zero-training policy — your inputs are never used to improve our models without your explicit consent. Built to be fully GDPR, CCPA, and SOC 2 Type II compliant from day one.</div></div>
+    </div>
+
+    <div class="feature-card reveal">
+      <span class="feature-num">04</span>
+      <span class="feature-icon">🌐</span>
+      <div class="feature-title">Real-Time Web Intel</div>
+      <div class="feature-desc">Connected to live data streams. Alpha1 knows what's happening right now, not just what it was trained on.</div>
+      <span class="feature-arrow">▼ <span>▼</span> LEARN MORE</span>
+      <div class="feature-expand"><div class="feature-expand-inner">Unlike static AI models stuck at a training cutoff, Alpha1 maintains live connections to thousands of real-time data sources — news, markets, research papers, and social signals. When you ask a question, you get an answer grounded in what's happening right now, not six months ago. Real-time intelligence for a real-time world.</div></div>
+    </div>
+
+    <div class="feature-card reveal">
+      <span class="feature-num">05</span>
+      <span class="feature-icon">🎯</span>
+      <div class="feature-title">Precision Automation</div>
+      <div class="feature-desc">Build complex automations with natural language. No code needed — just describe what you want.</div>
+      <span class="feature-arrow">▼ <span>▼</span> LEARN MORE</span>
+      <div class="feature-expand"><div class="feature-expand-inner">Describe your workflow in plain language and Alpha1 constructs, tests, and deploys a fully functional automation pipeline. Connect it to Slack, Notion, Google Workspace, GitHub, and 200+ more tools. Conditional logic, multi-step triggers, error handling — all handled automatically. What used to take a developer days now takes you minutes.</div></div>
+    </div>
+
+    <div class="feature-card reveal">
+      <span class="feature-num">06</span>
+      <span class="feature-icon">🚀</span>
+      <div class="feature-title">One-Click Deploy</div>
+      <div class="feature-desc">Push your AI projects live instantly. From idea to production with a single click.</div>
+      <span class="feature-arrow">▼ <span>▼</span> LEARN MORE</span>
+      <div class="feature-expand"><div class="feature-expand-inner">Alpha1 manages your entire deployment infrastructure — serverless functions, scaling, CDN distribution, and uptime monitoring — all behind a single button. Deploy your AI project globally in under 10 seconds. No DevOps knowledge required. Automatic rollbacks, zero-downtime updates, and real-time analytics included out of the box.</div></div>
+    </div>
+
   </div>
 </section>
 
@@ -242,9 +339,18 @@
   <h2 class="section-title reveal">People Are <span style="color:var(--neon2)">Talking.</span></h2>
   <p class="section-sub reveal">Beta testers are already calling Alpha1 the most powerful AI platform they've ever used.</p>
   <div class="testi-grid">
-    <div class="testi-card reveal"><div class="stars">★★★★★</div><div class="testi-text">"I've tried every AI tool out there. Alpha1 is on a completely different level. It feels like the future, today."</div><div class="testi-author"><div class="testi-avatar">RK</div><div><div class="testi-name">Rahul Kumar</div><div class="testi-role">Software Engineer, Bangalore</div></div></div></div>
-    <div class="testi-card reveal"><div class="stars">★★★★★</div><div class="testi-text">"The speed, the accuracy, the UI — everything is next level. I'm never going back to the old tools."</div><div class="testi-author"><div class="testi-avatar">PS</div><div><div class="testi-name">Priya Sharma</div><div class="testi-role">Product Manager, Mumbai</div></div></div></div>
-    <div class="testi-card reveal"><div class="stars">★★★★★</div><div class="testi-text">"Alpha1 automated 3 hours of my daily work in the first week. Atharv is building something insane here."</div><div class="testi-author"><div class="testi-avatar">AV</div><div><div class="testi-name">Arjun Verma</div><div class="testi-role">Startup Founder, Delhi</div></div></div></div>
+    <div class="testi-card reveal">
+      <svg class="laser-svg" viewBox="0 0 100 100" preserveAspectRatio="none"><rect class="laser-rect" x="0.5" y="0.5" width="99" height="99" fill="none" stroke="url(#lg1)" stroke-width="1.5"/><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00f0ff"/><stop offset="100%" stop-color="#7b2fff"/></linearGradient></defs></svg>
+      <div class="stars">★★★★★</div><div class="testi-text">"I've tried every AI tool out there. Alpha1 is on a completely different level. It feels like the future, today."</div><div class="testi-author"><div class="testi-avatar">RK</div><div><div class="testi-name">Rahul Kumar</div><div class="testi-role">Software Engineer, Bangalore</div></div></div>
+    </div>
+    <div class="testi-card reveal">
+      <svg class="laser-svg" viewBox="0 0 100 100" preserveAspectRatio="none"><rect class="laser-rect" x="0.5" y="0.5" width="99" height="99" fill="none" stroke="url(#lg2)" stroke-width="1.5"/><defs><linearGradient id="lg2" x1="1" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff2f7b"/><stop offset="100%" stop-color="#00f0ff"/></linearGradient></defs></svg>
+      <div class="stars">★★★★★</div><div class="testi-text">"The speed, the accuracy, the UI — everything is next level. I'm never going back to the old tools."</div><div class="testi-author"><div class="testi-avatar">PS</div><div><div class="testi-name">Priya Sharma</div><div class="testi-role">Product Manager, Mumbai</div></div></div>
+    </div>
+    <div class="testi-card reveal">
+      <svg class="laser-svg" viewBox="0 0 100 100" preserveAspectRatio="none"><rect class="laser-rect" x="0.5" y="0.5" width="99" height="99" fill="none" stroke="url(#lg3)" stroke-width="1.5"/><defs><linearGradient id="lg3" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="#7b2fff"/><stop offset="100%" stop-color="#ff2f7b"/></linearGradient></defs></svg>
+      <div class="stars">★★★★★</div><div class="testi-text">"Alpha1 automated 3 hours of my daily work in the first week. Atharv is building something insane here."</div><div class="testi-author"><div class="testi-avatar">AV</div><div><div class="testi-name">Arjun Verma</div><div class="testi-role">Startup Founder, Delhi</div></div></div>
+    </div>
   </div>
 </section>
 
@@ -284,6 +390,18 @@
     </div>
   </div>
 </section>
+
+<!-- THANK YOU MODAL -->
+<div id="ty-modal">
+  <canvas id="ty-canvas"></canvas>
+  <div class="ty-inner">
+    <span class="ty-icon">🚀</span>
+    <div class="ty-title">YOU'RE IN!</div>
+    <div class="ty-badge"><span class="badge-dot"></span> FOUNDING MEMBER SECURED</div>
+    <p class="ty-sub">Welcome to the future, <strong id="ty-name" style="color:var(--neon)">pioneer</strong>. You're now on the Alpha1 waitlist.<br/>We'll hit you up the moment we launch. Get ready.</p>
+    <button class="ty-close" onclick="closeTy()">← BACK TO SITE</button>
+  </div>
+</div>
 
 <footer>
   <span class="footer-logo">ALPHA1</span>
@@ -367,12 +485,164 @@ let wlCount = 247;
 setInterval(() => { if(Math.random()>.7){wlCount++;const e=document.getElementById('wl-count');if(e)e.textContent=wlCount;} }, 9000);
 
 function joinWaitlist() {
-  const email = document.getElementById('email-input').value;
-  if(!email||!email.includes('@')){alert('Please enter a valid email!');return;}
-  document.getElementById('waitlist-success').style.display='block';
-  document.getElementById('email-input').value='';
+  const emailEl = document.getElementById('email-input');
+  const email = emailEl.value;
+  if(!email||!email.includes('@')){emailEl.style.outline='1px solid #ff2f7b';setTimeout(()=>emailEl.style.outline='',1200);return;}
+  // show thank you modal
+  const name = email.split('@')[0];
+  document.getElementById('ty-name').textContent = name;
+  document.getElementById('ty-modal').classList.add('show');
+  emailEl.value = '';
   wlCount++;const e=document.getElementById('wl-count');if(e)e.textContent=wlCount;
+  startTyParticles();
 }
+function closeTy() { document.getElementById('ty-modal').classList.remove('show'); stopTyParticles(); }
+
+// Thank you modal particle burst
+let tyAnim = null, tyPts = [];
+function startTyParticles() {
+  const c = document.getElementById('ty-canvas');
+  const cx = c.getContext('2d');
+  c.width = window.innerWidth; c.height = window.innerHeight;
+  tyPts = [];
+  for(let i=0;i<120;i++) tyPts.push({
+    x: c.width/2, y: c.height/2,
+    vx: (Math.random()-0.5)*12, vy: (Math.random()-0.5)*12,
+    r: Math.random()*3+1, a: 1,
+    color: ['#00f0ff','#7b2fff','#ff2f7b','#00ff88'][Math.floor(Math.random()*4)]
+  });
+  function frame() {
+    cx.clearRect(0,0,c.width,c.height);
+    tyPts.forEach(p => {
+      p.x+=p.vx; p.y+=p.vy; p.vy+=0.12; p.a-=0.008;
+      cx.globalAlpha=Math.max(0,p.a);
+      cx.beginPath(); cx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      cx.fillStyle=p.color; cx.shadowBlur=12; cx.shadowColor=p.color; cx.fill();
+    });
+    cx.globalAlpha=1; cx.shadowBlur=0;
+    // continuous floating particles
+    if(Math.random()>0.6) tyPts.push({
+      x: Math.random()*c.width, y: c.height+10,
+      vx: (Math.random()-0.5)*1.5, vy: -(Math.random()*2+1),
+      r: Math.random()*2+0.5, a: 0.8,
+      color: ['#00f0ff','#7b2fff','#ff2f7b'][Math.floor(Math.random()*3)]
+    });
+    tyPts = tyPts.filter(p=>p.a>0);
+    tyAnim = requestAnimationFrame(frame);
+  }
+  frame();
+}
+function stopTyParticles() { if(tyAnim) cancelAnimationFrame(tyAnim); }
+
+/* === NEON LASER BORDER on feature cards + testi cards === */
+function initLaserCard(card, colors) {
+  const cvs = document.createElement('canvas');
+  cvs.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:10;border-radius:inherit;';
+  card.style.position = 'relative';
+  card.appendChild(cvs);
+
+  let prog = 0, animId = null, active = false;
+
+  function draw() {
+    const W = cvs.offsetWidth, H = cvs.offsetHeight;
+    cvs.width = W; cvs.height = H;
+    const cx = cvs.getContext('2d');
+    cx.clearRect(0,0,W,H);
+
+    // total perimeter
+    const perim = 2*(W+H);
+    // beam head position
+    const head = prog * perim;
+    // beam tail (trailing 18% of perimeter)
+    const tailLen = perim * 0.18;
+
+    // draw beam as a series of short segments with gradient opacity
+    const steps = 80;
+    for(let i=0;i<steps;i++) {
+      const t = i/steps;
+      const pos = ((head - tailLen*(1-t)) % perim + perim) % perim;
+      const pt = perimPt(pos, W, H);
+      const alpha = t * 0.9;
+      cx.beginPath(); cx.arc(pt.x, pt.y, 1.8, 0, Math.PI*2);
+      cx.fillStyle = lerpColor(colors[0], colors[1], t, alpha);
+      cx.shadowBlur = 8; cx.shadowColor = colors[0];
+      cx.fill();
+    }
+    // bright head dot
+    const hp = perimPt(head % perim, W, H);
+    cx.beginPath(); cx.arc(hp.x, hp.y, 3, 0, Math.PI*2);
+    cx.fillStyle = colors[0]; cx.shadowBlur = 20; cx.shadowColor = colors[0]; cx.fill();
+    cx.shadowBlur = 0;
+
+    // dim border always
+    cx.strokeStyle = 'rgba(0,240,255,0.08)'; cx.lineWidth = 1;
+    cx.strokeRect(0.5,0.5,W-1,H-1);
+  }
+
+  function loop() {
+    prog += 0.006;
+    if(prog > 1) prog = 0;
+    draw();
+    animId = requestAnimationFrame(loop);
+  }
+
+  card.addEventListener('mouseenter', () => { active=true; if(!animId) loop(); });
+  card.addEventListener('mouseleave', () => {
+    active=false;
+    if(animId){ cancelAnimationFrame(animId); animId=null; }
+    const W=cvs.offsetWidth, H=cvs.offsetHeight;
+    cvs.width=W; cvs.height=H;
+    const cx=cvs.getContext('2d');
+    cx.clearRect(0,0,W,H);
+    cx.strokeStyle='rgba(0,240,255,0.12)'; cx.lineWidth=1;
+    cx.strokeRect(0.5,0.5,W-1,H-1);
+  });
+  // default border
+  setTimeout(()=>{ const W=cvs.offsetWidth,H=cvs.offsetHeight; cvs.width=W; cvs.height=H; const cx=cvs.getContext('2d'); cx.strokeStyle='rgba(0,240,255,0.12)'; cx.lineWidth=1; cx.strokeRect(0.5,0.5,W-1,H-1); },100);
+}
+
+function perimPt(d, W, H) {
+  if(d < W) return {x:d, y:0};
+  d-=W; if(d < H) return {x:W, y:d};
+  d-=H; if(d < W) return {x:W-d, y:H};
+  d-=W; return {x:0, y:H-d};
+}
+
+function lerpColor(c1, c2, t, alpha) {
+  const p = (h) => parseInt(h,16);
+  const r1=p(c1.slice(1,3)),g1=p(c1.slice(3,5)),b1=p(c1.slice(5,7));
+  const r2=p(c2.slice(1,3)),g2=p(c2.slice(3,5)),b2=p(c2.slice(5,7));
+  return `rgba(${Math.round(r1+(r2-r1)*t)},${Math.round(g1+(g2-g1)*t)},${Math.round(b1+(b2-b1)*t)},${alpha})`;
+}
+
+document.querySelectorAll('.feature-card').forEach((card,i) => {
+  const palettes = [['#00f0ff','#7b2fff'],['#7b2fff','#ff2f7b'],['#ff2f7b','#00f0ff'],['#00f0ff','#7b2fff'],['#7b2fff','#00f0ff'],['#00f0ff','#ff2f7b']];
+  // remove old static svg border if any
+  card.style.border = 'none';
+  initLaserCard(card, palettes[i % palettes.length]);
+
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5;
+    const y = (e.clientY - r.top) / r.height - 0.5;
+    card.style.transform = `perspective(800px) rotateX(${-y * 10}deg) rotateY(${x * 10}deg) translateY(-8px)`;
+  });
+  card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+  card.addEventListener('click', () => {
+    const isOpen = card.classList.contains('expanded');
+    document.querySelectorAll('.feature-card').forEach(c => c.classList.remove('expanded'));
+    if (!isOpen) card.classList.add('expanded');
+  });
+});
+
+document.querySelectorAll('.testi-card').forEach((card,i) => {
+  const palettes = [['#00f0ff','#7b2fff'],['#ff2f7b','#00f0ff'],['#7b2fff','#ff2f7b']];
+  card.style.border = 'none';
+  // remove inline svg we added in HTML (used canvas instead)
+  const svg = card.querySelector('.laser-svg'); if(svg) svg.remove();
+  initLaserCard(card, palettes[i % palettes.length]);
+});
+/* === END LASER === */
 
 const faqs = [
   {keys:['what is alpha','about alpha','tell me','kya hai','alpha1 kya'],ans:"Alpha1 is a next-gen AI platform founded by Atharv Sahu. We're building smarter workflows, automation tools, and AI-powered apps — all in one place. 🚀"},
