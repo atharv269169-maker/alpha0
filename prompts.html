@@ -12,6 +12,7 @@
 
   /* BG */
   .grid-lines{position:fixed;inset:0;background-image:linear-gradient(rgba(0,240,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,0.025) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+  #bg-3d{position:fixed;inset:0;z-index:0;pointer-events:none;}
 
   /* NAV */
   nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 6%;background:rgba(2,4,8,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,240,255,0.1);}
@@ -113,6 +114,7 @@
 </style>
 </head>
 <body>
+<canvas id="bg-3d"></canvas>
 <div class="grid-lines"></div>
 
 <nav>
@@ -131,7 +133,6 @@
     <div class="stat"><div class="stat-num">5</div><div class="stat-label">Categories</div></div>
     <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Free</div></div>
   </div>
-  <button class="pdf-btn" onclick="window.print()">⬇ Save as PDF</button>
 </div>
 
 <div class="content">
@@ -369,20 +370,120 @@ Content ideas + posting strategy.<button class="copy-btn" onclick="copyPrompt(th
   <p class="footer-text">This is just the beginning. Alpha1 is building the most powerful AI platform for students, creators, and builders. Join early — get exclusive access.</p>
   <div class="footer-coming"><span style="width:6px;height:6px;background:var(--neon2);border-radius:50%;box-shadow:0 0 8px var(--neon2);display:inline-block;animation:blink 1.5s infinite"></span> EXCLUSIVE PAID PACK — 200+ ADVANCED PROMPTS COMING SOON</div>
   <br/><br/>
+  <button class="pdf-btn" onclick="window.print()" style="margin-bottom:1.5rem;">⬇ Save All 50 Prompts as PDF</button>
+  <br/>
   <a href="https://atharv269169-maker.github.io/alpha0/#waitlist" class="waitlist-btn">🚀 Join Alpha1 Waitlist</a>
   <br/><br/><br/>
   <p style="color:var(--muted);font-size:0.72rem;">© 2025 Alpha1 · Built by Atharv Sahu · Free to share</p>
 </div>
 
 <script>
+// === 3D FLOATING PARTICLES BACKGROUND ===
+const canvas = document.getElementById('bg-3d');
+const ctx = canvas.getContext('2d');
+let W, H;
+
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize(); window.addEventListener('resize', resize);
+
+const colors = ['rgba(0,240,255,', 'rgba(123,47,255,', 'rgba(255,47,123,', 'rgba(0,255,136,'];
+
+// Floating particles
+const particles = Array.from({length: 80}, () => ({
+  x: Math.random() * 3000, y: Math.random() * 3000,
+  z: Math.random() * 2 + 0.3,
+  vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
+  color: colors[Math.floor(Math.random() * colors.length)],
+  a: Math.random() * 0.3 + 0.05
+}));
+
+// 3D geometric lines — rotating cube wireframes
+const cubes = Array.from({length: 5}, (_, i) => ({
+  x: Math.random() * window.innerWidth,
+  y: Math.random() * window.innerHeight,
+  size: Math.random() * 60 + 30,
+  rotX: Math.random() * Math.PI * 2,
+  rotY: Math.random() * Math.PI * 2,
+  rotZ: Math.random() * Math.PI * 2,
+  vX: (Math.random() - 0.5) * 0.005,
+  vY: (Math.random() - 0.5) * 0.005,
+  vZ: (Math.random() - 0.5) * 0.005,
+  color: colors[i % colors.length],
+  opacity: Math.random() * 0.12 + 0.04
+}));
+
+function project3D(x, y, z, cx, cy) {
+  const fov = 400;
+  const scale = fov / (fov + z);
+  return { x: cx + x * scale, y: cy + y * scale, s: scale };
+}
+
+function drawCube(cube) {
+  const s = cube.size;
+  const pts3D = [
+    [-s,-s,-s],[s,-s,-s],[s,s,-s],[-s,s,-s],
+    [-s,-s,s],[s,-s,s],[s,s,s],[-s,s,s]
+  ];
+
+  // rotate
+  const pts = pts3D.map(([x,y,z]) => {
+    // rotX
+    let ny = y*Math.cos(cube.rotX) - z*Math.sin(cube.rotX);
+    let nz = y*Math.sin(cube.rotX) + z*Math.cos(cube.rotX);
+    y=ny; z=nz;
+    // rotY
+    let nx = x*Math.cos(cube.rotY) + z*Math.sin(cube.rotY);
+    nz = -x*Math.sin(cube.rotY) + z*Math.cos(cube.rotY);
+    x=nx; z=nz;
+    // rotZ
+    nx = x*Math.cos(cube.rotZ) - y*Math.sin(cube.rotZ);
+    ny = x*Math.sin(cube.rotZ) + y*Math.cos(cube.rotZ);
+    return project3D(nx, ny, z, cube.x, cube.y);
+  });
+
+  const edges = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+  ctx.strokeStyle = cube.color + cube.opacity + ')';
+  ctx.lineWidth = 0.8;
+  edges.forEach(([a,b]) => {
+    ctx.beginPath();
+    ctx.moveTo(pts[a].x, pts[a].y);
+    ctx.lineTo(pts[b].x, pts[b].y);
+    ctx.stroke();
+  });
+
+  cube.rotX += cube.vX; cube.rotY += cube.vY; cube.rotZ += cube.vZ;
+}
+
+function animate() {
+  ctx.clearRect(0,0,W,H);
+
+  // draw cubes
+  cubes.forEach(c => drawCube(c));
+
+  // draw particles
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if(p.x<0)p.x=W; if(p.x>W)p.x=0;
+    if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.z, 0, Math.PI*2);
+    ctx.fillStyle = p.color + p.a + ')';
+    ctx.shadowBlur = 6; ctx.shadowColor = p.color + '0.5)';
+    ctx.fill();
+  });
+  ctx.shadowBlur = 0;
+
+  requestAnimationFrame(animate);
+}
+animate();
+// === END 3D ANIMATION ===
+
 // Accordion
 document.querySelectorAll('.acc-header').forEach(header => {
   header.addEventListener('click', () => {
     const item = header.parentElement;
     const isOpen = item.classList.contains('open');
-    // close all
     document.querySelectorAll('.acc-item').forEach(i => i.classList.remove('open'));
-    // open clicked if was closed
     if(!isOpen) item.classList.add('open');
   });
 });
