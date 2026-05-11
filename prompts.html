@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Alpha1 — 50 Student AI Prompts</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Syne:wght@400;600;800&family=Space+Mono&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#020408;--bg2:#060d14;--neon:#00f0ff;--neon2:#7b2fff;--neon3:#ff2f7b;--neon4:#00ff88;--text:#e8f4ff;--muted:#5a7a8a;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;overflow-x:hidden;}
+
+  /* BG */
+  .grid-lines{position:fixed;inset:0;background-image:linear-gradient(rgba(0,240,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,0.025) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 6%;background:rgba(2,4,8,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,240,255,0.1);}
+  .nav-logo{font-family:'Orbitron',monospace;font-weight:900;font-size:1.1rem;color:var(--neon);text-shadow:0 0 20px var(--neon);letter-spacing:3px;text-decoration:none;}
+  .nav-back{font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--muted);text-decoration:none;letter-spacing:2px;text-transform:uppercase;transition:color .2s;}
+  .nav-back:hover{color:var(--neon);}
+
+  /* HERO */
+  .hero{position:relative;z-index:1;min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8rem 2rem 4rem;}
+  .orb1{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(0,240,255,0.06),transparent 70%);top:-100px;left:-150px;pointer-events:none;animation:float 8s ease-in-out infinite;}
+  .orb2{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(123,47,255,0.07),transparent 70%);bottom:0;right:-100px;pointer-events:none;animation:float 10s ease-in-out infinite reverse;}
+  .hero-badge{display:inline-flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:4px;color:var(--neon);text-transform:uppercase;border:1px solid rgba(0,240,255,0.2);padding:7px 20px;margin-bottom:2rem;background:rgba(0,240,255,0.04);}
+  .badge-dot{width:6px;height:6px;background:var(--neon);border-radius:50%;box-shadow:0 0 8px var(--neon);animation:blink 1.5s infinite;}
+  .hero h1{font-family:'Orbitron',monospace;font-size:clamp(2rem,6vw,5rem);font-weight:900;line-height:1.05;margin-bottom:1rem;}
+  .hero h1 .l1{display:block;color:var(--text);letter-spacing:4px;}
+  .hero h1 .l2{display:block;background:linear-gradient(90deg,var(--neon),var(--neon2),var(--neon3),var(--neon));background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gradientShift 4s linear infinite;}
+  .hero-sub{color:var(--muted);font-size:0.95rem;max-width:520px;line-height:1.75;margin:1rem auto 2rem;}
+  .hero-stats{display:flex;gap:3rem;flex-wrap:wrap;justify-content:center;margin-bottom:2.5rem;}
+  .stat-num{font-family:'Orbitron',monospace;font-size:1.8rem;font-weight:900;color:var(--neon);text-shadow:0 0 20px var(--neon);}
+  .stat-label{font-size:0.65rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:3px;}
+  .pdf-btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--neon2),var(--neon));color:var(--bg);padding:14px 36px;font-family:'Orbitron',monospace;font-weight:700;font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;border:none;cursor:pointer;box-shadow:0 0 30px rgba(0,240,255,0.3);transition:all .3s;}
+  .pdf-btn:hover{box-shadow:0 0 60px rgba(0,240,255,0.6);transform:translateY(-3px);}
+
+  /* CONTENT */
+  .content{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:2rem 4% 6rem;}
+
+  /* CATEGORY */
+  .cat-header{display:flex;align-items:center;gap:16px;margin:3rem 0 1.5rem;}
+  .cat-line{flex:1;height:1px;background:linear-gradient(90deg,rgba(0,240,255,0.3),transparent);}
+  .cat-label{font-family:'Orbitron',monospace;font-size:0.72rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:8px 18px;border:1px solid rgba(0,240,255,0.2);background:rgba(0,240,255,0.05);white-space:nowrap;}
+  .cat-label.c1{color:var(--neon);border-color:rgba(0,240,255,0.25);}
+  .cat-label.c2{color:var(--neon2);border-color:rgba(123,47,255,0.25);background:rgba(123,47,255,0.05);}
+  .cat-label.c3{color:var(--neon3);border-color:rgba(255,47,123,0.25);background:rgba(255,47,123,0.05);}
+  .cat-label.c4{color:var(--neon4);border-color:rgba(0,255,136,0.25);background:rgba(0,255,136,0.05);}
+  .cat-label.c5{color:#f59e0b;border-color:rgba(245,158,11,0.25);background:rgba(245,158,11,0.05);}
+
+  /* ACCORDION */
+  .accordion{display:flex;flex-direction:column;gap:10px;}
+
+  .acc-item{
+    background:rgba(6,13,20,0.9);
+    border:1px solid rgba(0,240,255,0.1);
+    position:relative;
+    overflow:hidden;
+    transition:border-color .3s, box-shadow .3s;
+    transform-style:preserve-3d;
+  }
+  .acc-item::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent,var(--neon)),transparent);transform:scaleX(0);transform-origin:center;transition:transform .4s;}
+  .acc-item:hover{border-color:rgba(0,240,255,0.25);box-shadow:0 8px 30px rgba(0,240,255,0.08);}
+  .acc-item:hover::before, .acc-item.open::before{transform:scaleX(1);}
+  .acc-item.open{border-color:rgba(0,240,255,0.3);box-shadow:0 12px 40px rgba(0,240,255,0.12);}
+
+  /* color variants */
+  .acc-item.c2{--accent:var(--neon2);}
+  .acc-item.c2:hover,.acc-item.c2.open{border-color:rgba(123,47,255,0.3);box-shadow:0 12px 40px rgba(123,47,255,0.12);}
+  .acc-item.c3{--accent:var(--neon3);}
+  .acc-item.c3:hover,.acc-item.c3.open{border-color:rgba(255,47,123,0.3);box-shadow:0 12px 40px rgba(255,47,123,0.12);}
+  .acc-item.c4{--accent:var(--neon4);}
+  .acc-item.c4:hover,.acc-item.c4.open{border-color:rgba(0,255,136,0.3);box-shadow:0 12px 40px rgba(0,255,136,0.12);}
+  .acc-item.c5{--accent:#f59e0b;}
+  .acc-item.c5:hover,.acc-item.c5.open{border-color:rgba(245,158,11,0.3);box-shadow:0 12px 40px rgba(245,158,11,0.12);}
+
+  .acc-header{display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;user-select:none;}
+  .acc-num{font-family:'Orbitron',monospace;font-size:0.6rem;color:rgba(0,240,255,0.3);font-weight:900;min-width:24px;}
+  .acc-icon{font-size:1.3rem;filter:drop-shadow(0 0 5px rgba(0,240,255,0.3));flex-shrink:0;}
+  .acc-title{font-family:'Orbitron',monospace;font-size:0.82rem;font-weight:700;color:var(--text);flex:1;letter-spacing:1px;}
+  .acc-arrow{font-size:0.7rem;color:var(--muted);transition:transform .3s, color .3s;flex-shrink:0;}
+  .acc-item.open .acc-arrow{transform:rotate(180deg);color:var(--neon);}
+  .acc-item.c2.open .acc-arrow{color:var(--neon2);}
+  .acc-item.c3.open .acc-arrow{color:var(--neon3);}
+  .acc-item.c4.open .acc-arrow{color:var(--neon4);}
+  .acc-item.c5.open .acc-arrow{color:#f59e0b;}
+
+  .acc-body{max-height:0;overflow:hidden;transition:max-height .5s ease, opacity .3s;opacity:0;}
+  .acc-item.open .acc-body{max-height:400px;opacity:1;}
+  .acc-body-inner{padding:0 20px 20px 58px;}
+  .acc-prompt{background:rgba(0,240,255,0.04);border:1px solid rgba(0,240,255,0.12);padding:14px 16px;font-family:'Space Mono',monospace;font-size:0.72rem;color:#8aaabb;line-height:1.7;white-space:pre-wrap;margin-bottom:10px;position:relative;}
+  .acc-item.c2 .acc-prompt{background:rgba(123,47,255,0.04);border-color:rgba(123,47,255,0.15);}
+  .acc-item.c3 .acc-prompt{background:rgba(255,47,123,0.04);border-color:rgba(255,47,123,0.15);}
+  .acc-item.c4 .acc-prompt{background:rgba(0,255,136,0.04);border-color:rgba(0,255,136,0.15);}
+  .acc-item.c5 .acc-prompt{background:rgba(245,158,11,0.04);border-color:rgba(245,158,11,0.15);}
+  .copy-btn{position:absolute;top:8px;right:8px;background:rgba(0,240,255,0.1);border:1px solid rgba(0,240,255,0.2);color:var(--neon);font-family:'Space Mono',monospace;font-size:0.6rem;padding:4px 10px;cursor:pointer;transition:all .2s;letter-spacing:1px;}
+  .copy-btn:hover{background:rgba(0,240,255,0.2);}
+  .copy-btn.copied{color:var(--neon4);border-color:var(--neon4);}
+  .acc-tip{font-size:0.75rem;color:var(--muted);line-height:1.6;font-style:italic;padding-left:4px;}
+  .acc-tip::before{content:'💡 ';font-style:normal;}
+
+  /* FOOTER */
+  .footer-section{position:relative;z-index:1;text-align:center;padding:4rem 2rem 5rem;border-top:1px solid rgba(0,240,255,0.1);}
+  .footer-logo{font-family:'Orbitron',monospace;font-weight:900;font-size:1.3rem;color:var(--neon);text-shadow:0 0 20px var(--neon);letter-spacing:4px;margin-bottom:1rem;}
+  .footer-text{color:var(--muted);font-size:0.85rem;line-height:1.7;max-width:480px;margin:0 auto 2rem;}
+  .footer-coming{display:inline-flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:2px;color:var(--neon2);border:1px solid rgba(123,47,255,0.3);padding:10px 22px;background:rgba(123,47,255,0.06);margin-bottom:2rem;}
+  .waitlist-btn{display:inline-flex;align-items:center;gap:8px;background:var(--neon);color:var(--bg);padding:14px 36px;font-family:'Orbitron',monospace;font-weight:700;font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:all .3s;box-shadow:0 0 30px rgba(0,240,255,0.3);}
+  .waitlist-btn:hover{box-shadow:0 0 60px rgba(0,240,255,0.6);transform:translateY(-2px);}
+
+  @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-18px);}}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.2;}}
+  @keyframes gradientShift{0%{background-position:0%;}100%{background-position:200%;}}
+</style>
+</head>
+<body>
+<div class="grid-lines"></div>
+
+<nav>
+  <a href="https://atharv269169-maker.github.io/alpha0/" class="nav-logo">ALPHA1</a>
+  <a href="https://atharv269169-maker.github.io/alpha0/" class="nav-back">← Back to Site</a>
+</nav>
+
+<div class="hero">
+  <div class="orb1"></div>
+  <div class="orb2"></div>
+  <div class="hero-badge"><span class="badge-dot"></span> Free Resource — Alpha1</div>
+  <h1><span class="l1">50 AI PROMPTS</span><span class="l2">FOR STUDENTS</span></h1>
+  <p class="hero-sub">Copy. Paste. Dominate. 50 power prompts across 5 categories — for any AI tool. Click any prompt to expand!</p>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">50</div><div class="stat-label">Prompts</div></div>
+    <div class="stat"><div class="stat-num">5</div><div class="stat-label">Categories</div></div>
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Free</div></div>
+  </div>
+  <button class="pdf-btn" onclick="window.print()">⬇ Save as PDF</button>
+</div>
+
+<div class="content">
+
+<!-- CAT 1 -->
+<div class="cat-header"><div class="cat-line"></div><div class="cat-label c1">📚 Notes & Study</div><div class="cat-line"></div></div>
+<div class="accordion">
+  <div class="acc-item c1"><div class="acc-header"><span class="acc-num">01</span><span class="acc-icon">🧠</span><span class="acc-title">Instant Notes Maker</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Explain [topic] to me like I'm a 16 year old. Give me:
+- Key points in bullet form
+- 1 real life example
+- 3 most important things to remember for exam<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Replace [topic] with any subject — works with every chapter!</div></div></div></div>
+
+  <div class="acc-item c2"><div class="acc-header"><span class="acc-num">02</span><span class="acc-icon">📄</span><span class="acc-title">Chapter Summary in 2 Min</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Summarize this chapter in under 200 words.
+Only include what's important for exam.
+Chapter: [paste chapter text here]<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Paste entire chapters — AI filters only exam-worthy content!</div></div></div></div>
+
+  <div class="acc-item c3"><div class="acc-header"><span class="acc-num">03</span><span class="acc-icon">💡</span><span class="acc-title">Concept Simplifier</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">I don't understand [concept].
+Explain using a simple analogy or story.
+Then give me 3 practice questions on it.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Perfect for Physics, Chemistry, Math concepts!</div></div></div></div>
+
+  <div class="acc-item c4"><div class="acc-header"><span class="acc-num">04</span><span class="acc-icon">📐</span><span class="acc-title">Formula Cheat Sheet</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Create a cheat sheet of all important formulas
+and definitions for [subject] - [chapter].
+Format it like a quick reference card.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Save the output — instant revision card!</div></div></div></div>
+
+  <div class="acc-item c5"><div class="acc-header"><span class="acc-num">05</span><span class="acc-icon">🃏</span><span class="acc-title">Flashcard Creator</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Create 10 flashcards for [topic].
+Format: Front: [Question] | Back: [Answer]
+Make them exam-focused and concise.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Copy to Anki or Quizlet for spaced repetition!</div></div></div></div>
+
+  <div class="acc-item c1"><div class="acc-header"><span class="acc-num">06</span><span class="acc-icon">🗺️</span><span class="acc-title">Mind Map Builder</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Create a text mind map for [topic].
+Show: Main topic → subtopics → key points.
+Use indentation to show hierarchy.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Great for visual learners and essay planning!</div></div></div></div>
+
+  <div class="acc-item c2"><div class="acc-header"><span class="acc-num">07</span><span class="acc-icon">📖</span><span class="acc-title">Difficult Word Explainer</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">I'm reading about [topic] and don't understand:
+[word1, word2, word3]
+Explain each in one simple sentence with example.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Use for any subject with technical vocabulary!</div></div></div></div>
+
+  <div class="acc-item c3"><div class="acc-header"><span class="acc-num">08</span><span class="acc-icon">📊</span><span class="acc-title">1-Page Revision Notes</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Create 1-page revision notes for [chapter].
+Include: key concepts, important dates/numbers,
+common exam questions, and memory tricks.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Print and stick on wall before exams!</div></div></div></div>
+
+  <div class="acc-item c4"><div class="acc-header"><span class="acc-num">09</span><span class="acc-icon">🔗</span><span class="acc-title">Topic Connector</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">How is [topic A] related to [topic B]?
+Explain connection and why understanding
+both together helps in exams.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Builds deep understanding, not just memorization!</div></div></div></div>
+
+  <div class="acc-item c5"><div class="acc-header"><span class="acc-num">10</span><span class="acc-icon">🎯</span><span class="acc-title">Exam Pattern Analyzer</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">These are last year's exam questions on [topic]:
+[paste questions]
+What patterns do you see? What should I focus most?<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Use 3-5 years of PYQs for best results!</div></div></div></div>
+</div>
+
+<!-- CAT 2 -->
+<div class="cat-header"><div class="cat-line"></div><div class="cat-label c2">✍️ Assignments & Projects</div><div class="cat-line"></div></div>
+<div class="accordion">
+  <div class="acc-item c2"><div class="acc-header"><span class="acc-num">11</span><span class="acc-icon">📋</span><span class="acc-title">Assignment Outline Generator</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">I have to write an assignment on [topic] — [word count] words.
+Create outline: introduction, 3-4 main sections,
+conclusion. Subject: [subject name]<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Start every assignment with this — saves hours!</div></div></div></div>
+
+  <div class="acc-item c3"><div class="acc-header"><span class="acc-num">12</span><span class="acc-icon">✏️</span><span class="acc-title">Introduction Writer</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Write a strong introduction for assignment on [topic].
+Sound like a student — not too formal.
+Word count: 100 words.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Let AI break the blank page block!</div></div></div></div>
+
+  <div class="acc-item c4"><div class="acc-header"><span class="acc-num">13</span><span class="acc-icon">🔍</span><span class="acc-title">Research Point Finder</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">I'm writing about [topic].
+Give me 10 strong points I can use in my assignment
+with brief explanations for each.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Use these as your paragraph topics!</div></div></div></div>
+
+  <div class="acc-item c5"><div class="acc-header"><span class="acc-num">14</span><span class="acc-icon">🏁</span><span class="acc-title">Conclusion Maker</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Write a conclusion for assignment on [topic].
+Summarize: [point 1, point 2, point 3]
+Keep it under 100 words.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Add your own twist to make it genuine!</div></div></div></div>
+
+  <div class="acc-item c1"><div class="acc-header"><span class="acc-num">15</span><span class="acc-icon">💡</span><span class="acc-title">Project Idea Generator</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Give me 10 unique project ideas for [subject] - [grade].
+For each: what to make, materials, difficulty,
+and time required.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Pick the one that matches your skill level!</div></div></div></div>
+
+  <div class="acc-item c2"><div class="acc-header"><span class="acc-num">16</span><span class="acc-icon">🔄</span><span class="acc-title">Plagiarism-Safe Rewriter</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Rewrite this paragraph in my own words.
+Keep meaning same but change sentence structure.
+Paragraph: [paste text here]<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Always add your own examples after rewriting!</div></div></div></div>
+
+  <div class="acc-item c3"><div class="acc-header"><span class="acc-num">17</span><span class="acc-icon">📑</span><span class="acc-title">Case Study Analyzer</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Analyze this case study for [subject]:
+[paste case study]
+Give: main problem, stakeholders,
+solutions, best recommendation.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Works for Business Studies, Economics, Law!</div></div></div></div>
+
+  <div class="acc-item c4"><div class="acc-header"><span class="acc-num">18</span><span class="acc-icon">👥</span><span class="acc-title">Group Project Divider</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Group project on [topic] with [X] members.
+Divide work fairly — give each person tasks
+with deadlines over [X] weeks.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Share output with your whole group!</div></div></div></div>
+
+  <div class="acc-item c5"><div class="acc-header"><span class="acc-num">19</span><span class="acc-icon">📚</span><span class="acc-title">Bibliography Formatter</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Format these sources in [APA/MLA] style
+for my bibliography:
+[paste your sources here]<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Saves 30 mins of manual citation work!</div></div></div></div>
+
+  <div class="acc-item c1"><div class="acc-header"><span class="acc-num">20</span><span class="acc-icon">⭐</span><span class="acc-title">Answer Improver</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Make this answer better — more points,
+better language, proper structure.
+My answer: [paste] Question: [paste]<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Use after writing your draft — not before!</div></div></div></div>
+</div>
+
+<!-- CAT 3 -->
+<div class="cat-header"><div class="cat-line"></div><div class="cat-label c3">🎯 Exam Preparation</div><div class="cat-line"></div></div>
+<div class="accordion">
+  <div class="acc-item c3"><div class="acc-header"><span class="acc-num">21</span><span class="acc-icon">📝</span><span class="acc-title">Mock Test Creator</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Create 20-question mock test for [subject] - [chapter].
+Include: 5 MCQs, 5 short, 5 long, 5 application.
+Give answer key at the end.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Best way to test yourself before the real exam!</div></div></div></div>
+
+  <div class="acc-item c4"><div class="acc-header"><span class="acc-num">22</span><span class="acc-icon">⚠️</span><span class="acc-title">Weak Topic Identifier</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">I got these marks/made these mistakes: [details]
+What are my weak areas?
+What should I study more before exam?<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Be honest — AI gives better advice that way!</div></div></div></div>
+
+  <div class="acc-item c5"><div class="acc-header"><span class="acc-num">23</span><span class="acc-icon">📅</span><span class="acc-title">3-Day Revision Plan</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Exam for [subject] in 3 days.
+Topics: [list topics].
+Make hour-by-hour study plan for all 3 days.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Include breaks — AI will remind you to rest!</div></div></div></div>
+
+  <div class="acc-item c1"><div class="acc-header"><span class="acc-num">24</span><span class="acc-icon">🧩</span><span class="acc-title">Tricky Question Predictor</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Based on [syllabus/chapter list], what are
+top 10 tricky questions a teacher might ask?
+Give ideal answers for each.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Teachers repeat patterns — this helps you spot them!</div></div></div></div>
+
+  <div class="acc-item c2"><div class="acc-header"><span class="acc-num">25</span><span class="acc-icon">🧠</span><span class="acc-title">Memory Trick Maker</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Create funny mnemonics to remember:
+[list — dates, formulas, names, lists]
+Make them funny and easy to recall.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">The sillier the mnemonic, the better you remember!</div></div></div></div>
+
+  <div class="acc-item c3"><div class="acc-header"><span class="acc-num">26</span><span class="acc-icon">👀</span><span class="acc-title">Examiner's Perspective</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">What does examiner want when they ask: [question]?
+What key points MUST be in answer
+to get full marks? Subject: [subject]<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Think like the examiner — not just the student!</div></div></div></div>
+
+  <div class="acc-item c4"><div class="acc-header"><span class="acc-num">27</span><span class="acc-icon">⏱️</span><span class="acc-title">Exam Time Strategy</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Exam is [X] hours with [X] questions
+worth [X] marks each.
+How should I divide my time? Give strategy.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Practice timed tests with this strategy!</div></div></div></div>
+
+  <div class="acc-item c5"><div class="acc-header"><span class="acc-num">28</span><span class="acc-icon">🚨</span><span class="acc-title">Last Minute Cram</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">2 hours before [subject] exam.
+Topics: [list].
+Give absolute minimum I must know to pass.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Emergency only — study properly first!</div></div></div></div>
+
+  <div class="acc-item c1"><div class="acc-header"><span class="acc-num">29</span><span class="acc-icon">🎤</span><span class="acc-title">Self Quiz Mode</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Ask me 10 questions on [topic] one by one.
+After I answer each, tell if I'm right
+and explain the correct answer.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Type your answer — don't just read the question!</div></div></div></div>
+
+  <div class="acc-item c2"><div class="acc-header"><span class="acc-num">30</span><span class="acc-icon">📈</span><span class="acc-title">Score Improvement Plan</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">I scored [X]% in last [subject] test.
+Want to score [Y]% next time.
+What specific changes should I make?<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Be specific about what went wrong last time!</div></div></div></div>
+</div>
+
+<!-- CAT 4 -->
+<div class="cat-header"><div class="cat-line"></div><div class="cat-label c4">💼 Career & College</div><div class="cat-line"></div></div>
+<div class="accordion">
+  <div class="acc-item c4"><div class="acc-header"><span class="acc-num">31</span><span class="acc-icon">📃</span><span class="acc-title">SOP Writer</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Write Statement of Purpose for [college/course].
+My background: [your details]
+My goals: [your goals]. Limit: [X] words.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Add personal stories — make it uniquely yours!</div></div></div></div>
+
+  <div class="acc-item c5"><div class="acc-header"><span class="acc-num">32</span><span class="acc-icon">📄</span><span class="acc-title">Resume Builder</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Create student resume.
+Name:[X] Education:[X] Skills:[X]
+Projects:[X] Achievements:[X]
+Role applying for: [role/internship]<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Customize for each application!</div></div></div></div>
+
+  <div class="acc-item c1"><div class="acc-header"><span class="acc-num">33</span><span class="acc-icon">🎯</span><span class="acc-title">Interview Prep</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Interview for [college/internship/job].
+Give top 15 questions they might ask
+and ideal answers for each.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Practice out loud — don't just read answers!</div></div></div></div>
+
+  <div class="acc-item c2"><div class="acc-header"><span class="acc-num">34</span><span class="acc-icon">🏆</span><span class="acc-title">Scholarship Essay</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Scholarship essay for [scholarship name].
+Topic: [essay topic]. My story: [background].
+Word limit: [X] words.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Your unique story wins scholarships — be authentic!</div></div></div></div>
+
+  <div class="acc-item c3"><div class="acc-header"><span class="acc-num">35</span><span class="acc-icon">💼</span><span class="acc-title">LinkedIn Profile Writer</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Write LinkedIn profile for student.
+Details: [education, skills, projects, goals].
+Professional but genuine and approachable.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Add professional photo — 21x more profile views!</div></div></div></div>
+
+  <div class="acc-item c4"><div class="acc-header"><span class="acc-num">36</span><span class="acc-icon">📧</span><span class="acc-title">Email to Professor</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Professional email to professor asking [request].
+Name: [X], Subject: [X], University: [X].
+Respectful and concise — under 100 words.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Always proofread before sending!</div></div></div></div>
+
+  <div class="acc-item c5"><div class="acc-header"><span class="acc-num">37</span><span class="acc-icon">🚀</span><span class="acc-title">Internship Cover Letter</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Cover letter for internship at [company]
+for role of [role].
+My skills: [X]. Why I want this: [X].<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Research the company — mention something specific!</div></div></div></div>
+
+  <div class="acc-item c1"><div class="acc-header"><span class="acc-num">38</span><span class="acc-icon">🗺️</span><span class="acc-title">Career Path Advisor</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Studying [subject], interested in [interests].
+What career paths are best for me?
+Top 5 with salary, skills needed, how to start.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Explore multiple paths before committing!</div></div></div></div>
+
+  <div class="acc-item c2"><div class="acc-header"><span class="acc-num">39</span><span class="acc-icon">🏫</span><span class="acc-title">College Comparison</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Compare colleges for [course]:
+[college 1, college 2, college 3]
+Criteria: placement, fees, reputation, location.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Visit campuses before final decision!</div></div></div></div>
+
+  <div class="acc-item c3"><div class="acc-header"><span class="acc-num">40</span><span class="acc-icon">📊</span><span class="acc-title">Skill Gap Analyzer</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Want to become [career goal].
+Current skills: [list skills].
+What am I missing? How and where to learn?<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Build skills now — don't wait to finish college!</div></div></div></div>
+</div>
+
+<!-- CAT 5 -->
+<div class="cat-header"><div class="cat-line"></div><div class="cat-label c5">🧠 Productivity & Life Hacks</div><div class="cat-line"></div></div>
+<div class="accordion">
+  <div class="acc-item c5"><div class="acc-header"><span class="acc-num">41</span><span class="acc-icon">📅</span><span class="acc-title">Daily Schedule Maker</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Daily schedule for student:
+College: [X hrs], Study: [X hrs],
+Hobbies: [X], Sleep: [X hrs].
+Make it realistic and sustainable.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Try for 1 week then adjust!</div></div></div></div>
+
+  <div class="acc-item c1"><div class="acc-header"><span class="acc-num">42</span><span class="acc-icon">🎯</span><span class="acc-title">Distraction Killer</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">I keep getting distracted studying [subject].
+Give 5 practical techniques to stay focused
+specifically for this type of subject.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Try Pomodoro — 25 min focus, 5 min break!</div></div></div></div>
+
+  <div class="acc-item c2"><div class="acc-header"><span class="acc-num">43</span><span class="acc-icon">📚</span><span class="acc-title">Book Summarizer</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Summarize [book name] in 500 words.
+Include: main ideas, key lessons,
+3 things a student can apply immediately.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Read summaries before deciding to read full book!</div></div></div></div>
+
+  <div class="acc-item c3"><div class="acc-header"><span class="acc-num">44</span><span class="acc-icon">🎤</span><span class="acc-title">Debate Argument Builder</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">I argue [FOR/AGAINST] [topic] in debate.
+Give: 5 strong arguments, facts for each,
+comebacks for opposite side.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Know both sides — makes your arguments stronger!</div></div></div></div>
+
+  <div class="acc-item c4"><div class="acc-header"><span class="acc-num">45</span><span class="acc-icon">🎬</span><span class="acc-title">Presentation Script</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Write [X] minute presentation script on [topic].
+Include: hook opening, 3 main points,
+transitions, strong conclusion.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Practice 5 times out loud before presenting!</div></div></div></div>
+
+  <div class="acc-item c5"><div class="acc-header"><span class="acc-num">46</span><span class="acc-icon">🧘</span><span class="acc-title">Exam Stress Manager</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Stressed about exams.
+Balance plan for: study, breaks, exercise,
+sleep for next [X] days. Make it realistic.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Sleep is #1 productivity hack — never skip it!</div></div></div></div>
+
+  <div class="acc-item c1"><div class="acc-header"><span class="acc-num">47</span><span class="acc-icon">▶️</span><span class="acc-title">YouTube to Notes</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Watched video on [topic]. I remember:
+[list key points]
+Organize into proper structured study notes.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Watch first, then organize — not the other way!</div></div></div></div>
+
+  <div class="acc-item c2"><div class="acc-header"><span class="acc-num">48</span><span class="acc-icon">✅</span><span class="acc-title">30-Day Habit Tracker</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">30-day habit tracker for student wanting:
+[habit 1, habit 2, habit 3]
+Daily checkboxes + weekly review questions.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Print and track physically — it works better!</div></div></div></div>
+
+  <div class="acc-item c3"><div class="acc-header"><span class="acc-num">49</span><span class="acc-icon">🔄</span><span class="acc-title">Weekly Review</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Review my week as student.
+Studied: [X]. Achieved: [X]. Problems: [X].
+What went well, improve, plan for next week.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Do every Sunday — compound progress over time!</div></div></div></div>
+
+  <div class="acc-item c4"><div class="acc-header"><span class="acc-num">50</span><span class="acc-icon">🌟</span><span class="acc-title">Personal Brand Builder</span><span class="acc-arrow">▼</span></div><div class="acc-body"><div class="acc-body-inner"><div class="acc-prompt">Student interested in [field].
+Help build personal brand on [platform].
+My strengths: [list strengths]
+Content ideas + posting strategy.<button class="copy-btn" onclick="copyPrompt(this)">COPY</button></div><div class="acc-tip">Start building your brand NOW — before graduation!</div></div></div></div>
+</div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer-section">
+  <div class="footer-logo">ALPHA1</div>
+  <p class="footer-text">This is just the beginning. Alpha1 is building the most powerful AI platform for students, creators, and builders. Join early — get exclusive access.</p>
+  <div class="footer-coming"><span style="width:6px;height:6px;background:var(--neon2);border-radius:50%;box-shadow:0 0 8px var(--neon2);display:inline-block;animation:blink 1.5s infinite"></span> EXCLUSIVE PAID PACK — 200+ ADVANCED PROMPTS COMING SOON</div>
+  <br/><br/>
+  <a href="https://atharv269169-maker.github.io/alpha0/#waitlist" class="waitlist-btn">🚀 Join Alpha1 Waitlist</a>
+  <br/><br/><br/>
+  <p style="color:var(--muted);font-size:0.72rem;">© 2025 Alpha1 · Built by Atharv Sahu · Free to share</p>
+</div>
+
+<script>
+// Accordion
+document.querySelectorAll('.acc-header').forEach(header => {
+  header.addEventListener('click', () => {
+    const item = header.parentElement;
+    const isOpen = item.classList.contains('open');
+    // close all
+    document.querySelectorAll('.acc-item').forEach(i => i.classList.remove('open'));
+    // open clicked if was closed
+    if(!isOpen) item.classList.add('open');
+  });
+});
+
+// Copy button
+function copyPrompt(btn) {
+  const promptBox = btn.parentElement;
+  const text = promptBox.innerText.replace('COPY','').replace('COPIED!','').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'COPIED!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// 3D hover on acc-item
+document.querySelectorAll('.acc-item').forEach(item => {
+  item.addEventListener('mousemove', e => {
+    const r = item.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5;
+    const y = (e.clientY - r.top) / r.height - 0.5;
+    item.style.transform = `perspective(1000px) rotateX(${-y*3}deg) rotateY(${x*3}deg)`;
+  });
+  item.addEventListener('mouseleave', () => { item.style.transform = ''; });
+});
+</script>
+</body>
+</html>
