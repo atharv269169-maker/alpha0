@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Alpha1 — AI Tool Comparator</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Syne:wght@400;600;800&family=Space+Mono&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#020408;--bg2:#060d14;--neon:#00f0ff;--neon2:#7b2fff;--neon3:#ff2f7b;--neon4:#00ff88;--text:#e8f4ff;--muted:#5a7a8a;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;overflow-x:hidden;}
+  #bg-3d{position:fixed;inset:0;z-index:0;pointer-events:none;}
+  .grid-lines{position:fixed;inset:0;background-image:linear-gradient(rgba(0,240,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,0.02) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 6%;background:rgba(2,4,8,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,240,255,0.1);}
+  .nav-logo{font-family:'Orbitron',monospace;font-weight:900;font-size:1.1rem;color:var(--neon);text-shadow:0 0 20px var(--neon);letter-spacing:3px;text-decoration:none;}
+  .nav-back{font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--muted);text-decoration:none;letter-spacing:2px;text-transform:uppercase;transition:color .2s;}
+  .nav-back:hover{color:var(--neon);}
+  .hero{position:relative;z-index:1;text-align:center;padding:8rem 2rem 3rem;}
+  .hero-badge{display:inline-flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:4px;color:var(--neon);text-transform:uppercase;border:1px solid rgba(0,240,255,0.2);padding:7px 20px;margin-bottom:1.5rem;background:rgba(0,240,255,0.04);}
+  .badge-dot{width:6px;height:6px;background:var(--neon);border-radius:50%;box-shadow:0 0 8px var(--neon);animation:blink 1.5s infinite;}
+  .hero h1{font-family:'Orbitron',monospace;font-size:clamp(1.8rem,5vw,4rem);font-weight:900;line-height:1.1;margin-bottom:1rem;}
+  .l1{display:block;color:var(--text);letter-spacing:3px;}
+  .l2{display:block;background:linear-gradient(90deg,var(--neon),var(--neon2),var(--neon3),var(--neon));background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gradientShift 4s linear infinite;}
+  .hero-sub{color:var(--muted);font-size:0.95rem;max-width:560px;margin:0 auto;}
+  .filter-wrap{position:relative;z-index:1;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:2rem 4%;margin-bottom:1rem;}
+  .filter-btn{padding:8px 20px;font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border:1px solid rgba(0,240,255,0.15);background:transparent;color:var(--muted);transition:all .25s;}
+  .filter-btn.active{background:rgba(0,240,255,0.1);color:var(--neon);border-color:rgba(0,240,255,0.4);}
+  .filter-btn:hover:not(.active){color:var(--text);border-color:rgba(0,240,255,0.25);}
+  .content{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 4% 4rem;}
+  .tools-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;}
+  .tool-card{background:rgba(6,13,20,0.95);border:1px solid rgba(0,240,255,0.1);padding:28px;position:relative;overflow:hidden;transition:transform .4s cubic-bezier(0.175,0.885,0.32,1.275),box-shadow .4s,border-color .3s;transform-style:preserve-3d;}
+  .tool-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--tc,var(--neon)),transparent);transform:scaleX(0);transform-origin:left;transition:transform .4s;}
+  .tool-card:hover{transform:perspective(800px) rotateX(3deg) rotateY(-2deg) translateY(-8px);border-color:var(--tc,var(--neon));box-shadow:0 20px 60px rgba(0,0,0,0.5),0 0 30px rgba(0,240,255,0.08);}
+  .tool-card:hover::before{transform:scaleX(1);}
+  .tool-header{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+  .tool-logo{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;border:1px solid rgba(0,240,255,0.15);}
+  .tool-name{font-family:'Orbitron',monospace;font-size:1rem;font-weight:700;color:var(--text);}
+  .tool-maker{font-size:0.72rem;color:var(--muted);margin-top:2px;}
+  .tool-badge{margin-left:auto;font-family:'Space Mono',monospace;font-size:0.58rem;padding:4px 10px;border:1px solid;letter-spacing:1px;white-space:nowrap;}
+  .badge-free{color:var(--neon4);border-color:rgba(0,255,136,0.3);background:rgba(0,255,136,0.06);}
+  .badge-paid{color:var(--neon3);border-color:rgba(255,47,123,0.3);background:rgba(255,47,123,0.06);}
+  .badge-freemium{color:var(--neon2);border-color:rgba(123,47,255,0.3);background:rgba(123,47,255,0.06);}
+  .tool-desc{font-size:0.83rem;color:var(--muted);line-height:1.65;margin-bottom:16px;}
+  .ratings{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+  .rating-row{display:flex;align-items:center;gap:10px;}
+  .rating-label{font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--muted);letter-spacing:1px;width:80px;flex-shrink:0;}
+  .rating-track{flex:1;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;}
+  .rating-fill{height:100%;border-radius:2px;width:0;transition:width 1.2s cubic-bezier(0.4,0,0.2,1);}
+  .rating-val{font-family:'Orbitron',monospace;font-size:0.65rem;color:var(--text);width:28px;text-align:right;}
+  .tool-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+  .tag{font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--muted);border:1px solid rgba(255,255,255,0.08);padding:3px 8px;letter-spacing:1px;}
+  .tag.highlight{color:var(--tc,var(--neon));border-color:var(--tc,var(--neon));background:rgba(0,240,255,0.05);}
+  .best-for{background:rgba(0,240,255,0.03);border:1px solid rgba(0,240,255,0.08);padding:10px 14px;font-size:0.78rem;color:var(--text);}
+  .best-for span{color:var(--tc,var(--neon));font-weight:700;}
+  .price-row{display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding-top:16px;border-top:1px solid rgba(0,240,255,0.06);}
+  .price{font-family:'Orbitron',monospace;font-size:0.85rem;font-weight:700;color:var(--text);}
+  .try-btn{font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:1px;color:var(--tc,var(--neon));border:1px solid var(--tc,var(--neon));padding:6px 14px;cursor:pointer;background:transparent;transition:all .2s;text-decoration:none;display:inline-block;}
+  .try-btn:hover{background:rgba(0,240,255,0.1);}
+  .winner-badge{position:absolute;top:16px;right:16px;font-family:'Orbitron',monospace;font-size:0.58rem;letter-spacing:1px;color:var(--bg);background:linear-gradient(135deg,var(--neon),var(--neon2));padding:4px 10px;font-weight:700;}
+  .compare-section{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 4% 4rem;}
+  .compare-title{font-family:'Orbitron',monospace;font-size:1.2rem;font-weight:900;color:var(--neon);letter-spacing:2px;margin-bottom:2rem;text-align:center;}
+  .compare-table{width:100%;border-collapse:collapse;}
+  .compare-table th{background:rgba(0,240,255,0.06);border:1px solid rgba(0,240,255,0.1);padding:12px 16px;font-family:'Orbitron',monospace;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--neon);text-align:center;}
+  .compare-table th:first-child{text-align:left;color:var(--muted);}
+  .compare-table td{border:1px solid rgba(0,240,255,0.06);padding:12px 16px;font-size:0.8rem;text-align:center;color:var(--muted);}
+  .compare-table td:first-child{text-align:left;color:var(--text);font-family:'Space Mono',monospace;font-size:0.72rem;}
+  .compare-table tr:hover td{background:rgba(0,240,255,0.02);}
+  .yes{color:var(--neon4)!important;font-size:1rem;}
+  .no{color:var(--neon3)!important;font-size:1rem;}
+  .partial{color:#f59e0b!important;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+  @keyframes gradientShift{0%{background-position:0%;}100%{background-position:200%;}}
+</style>
+</head>
+<body>
+<canvas id="bg-3d"></canvas>
+<div class="grid-lines"></div>
+<nav>
+  <a href="https://atharv269169-maker.github.io/alpha0/" class="nav-logo">ALPHA1</a>
+  <a href="https://atharv269169-maker.github.io/alpha0/" class="nav-back">← Back to Site</a>
+</nav>
+<div class="hero">
+  <div class="hero-badge"><span class="badge-dot"></span> Free Tool — Alpha1</div>
+  <h1><span class="l1">AI TOOL</span><span class="l2">COMPARATOR</span></h1>
+  <p class="hero-sub">Find the perfect AI tool for every task. Honest ratings, real comparisons — no sponsored bias.</p>
+</div>
+<div class="filter-wrap">
+  <button class="filter-btn active" onclick="filterTools('all',this)">All Tools</button>
+  <button class="filter-btn" onclick="filterTools('free',this)">Free Only</button>
+  <button class="filter-btn" onclick="filterTools('writing',this)">Writing</button>
+  <button class="filter-btn" onclick="filterTools('coding',this)">Coding</button>
+  <button class="filter-btn" onclick="filterTools('image',this)">Image</button>
+  <button class="filter-btn" onclick="filterTools('study',this)">Study</button>
+  <button class="filter-btn" onclick="filterTools('business',this)">Business</button>
+</div>
+<div class="content"><div class="tools-grid" id="toolsGrid"></div></div>
+<div class="compare-section">
+  <div class="compare-title">// FEATURE COMPARISON</div>
+  <div style="overflow-x:auto;">
+  <table class="compare-table">
+    <tr><th>Feature</th><th>ChatGPT</th><th>Claude</th><th>Gemini</th><th>Copilot</th><th>Llama</th></tr>
+    <tr><td>Free Plan</td><td class="partial">Limited</td><td class="partial">Limited</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+    <tr><td>Long Documents</td><td class="partial">GPT-4 only</td><td class="yes">✓ Best</td><td class="yes">✓</td><td class="partial">Partial</td><td class="no">✗</td></tr>
+    <tr><td>Code Generation</td><td class="yes">✓ Excellent</td><td class="yes">✓ Great</td><td class="yes">✓ Good</td><td class="yes">✓ Best</td><td class="partial">Partial</td></tr>
+    <tr><td>Image Generation</td><td class="yes">✓ DALL-E</td><td class="no">✗</td><td class="yes">✓ Imagen</td><td class="yes">✓ Designer</td><td class="no">✗</td></tr>
+    <tr><td>Web Search</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓ Best</td><td class="no">✗</td></tr>
+    <tr><td>Privacy</td><td class="partial">Moderate</td><td class="yes">✓ Best</td><td class="no">✗ Low</td><td class="partial">Moderate</td><td class="yes">✓ Local</td></tr>
+    <tr><td>API Access</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓ Free</td></tr>
+    <tr><td>Mobile App</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="partial">3rd party</td></tr>
+    <tr><td>Best For</td><td>General use</td><td>Writing/Analysis</td><td>Google Workspace</td><td>Microsoft 365</td><td>Privacy/Dev</td></tr>
+  </table>
+  </div>
+</div>
+<div style="text-align:center;padding:2rem 2rem 5rem;position:relative;z-index:1;">
+  <a href="https://atharv269169-maker.github.io/alpha0/#waitlist" style="display:inline-flex;align-items:center;gap:8px;background:var(--neon);color:var(--bg);padding:14px 36px;font-family:'Orbitron',monospace;font-weight:700;font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;box-shadow:0 0 30px rgba(0,240,255,0.3);">🚀 Join Alpha1 Waitlist</a>
+</div>
+<script>
+const canvas=document.getElementById('bg-3d');
+const ctx=canvas.getContext('2d');
+let W,H;
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+const cubes=Array.from({length:4},(_,i)=>({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,size:Math.random()*50+25,rotX:Math.random()*Math.PI*2,rotY:Math.random()*Math.PI*2,rotZ:Math.random()*Math.PI*2,vX:(Math.random()-.5)*.004,vY:(Math.random()-.5)*.004,vZ:(Math.random()-.5)*.004,color:['rgba(0,240,255,','rgba(123,47,255,','rgba(0,255,136,','rgba(255,47,123,'][i%4],opacity:.05}));
+const pts=Array.from({length:60},()=>({x:Math.random()*3000,y:Math.random()*3000,r:Math.random()*1.2+.3,vx:(Math.random()-.5)*.2,vy:(Math.random()-.5)*.2,color:['rgba(0,240,255,','rgba(123,47,255,'][Math.floor(Math.random()*2)],a:Math.random()*.15+.03}));
+function project(x,y,z,cx,cy){const f=400,s=f/(f+z);return{x:cx+x*s,y:cy+y*s};}
+function drawCube(c){const s=c.size,p3=[[-s,-s,-s],[s,-s,-s],[s,s,-s],[-s,s,-s],[-s,-s,s],[s,-s,s],[s,s,s],[-s,s,s]];const p=p3.map(([x,y,z])=>{let ny=y*Math.cos(c.rotX)-z*Math.sin(c.rotX),nz=y*Math.sin(c.rotX)+z*Math.cos(c.rotX);y=ny;z=nz;let nx=x*Math.cos(c.rotY)+z*Math.sin(c.rotY);nz=-x*Math.sin(c.rotY)+z*Math.cos(c.rotY);x=nx;z=nz;nx=x*Math.cos(c.rotZ)-y*Math.sin(c.rotZ);ny=x*Math.sin(c.rotZ)+y*Math.cos(c.rotZ);return project(nx,ny,z,c.x,c.y);});[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]].forEach(([a,b])=>{ctx.beginPath();ctx.moveTo(p[a].x,p[a].y);ctx.lineTo(p[b].x,p[b].y);ctx.strokeStyle=c.color+c.opacity+')';ctx.lineWidth=.8;ctx.stroke();});c.rotX+=c.vX;c.rotY+=c.vY;c.rotZ+=c.vZ;}
+function bgAnim(){ctx.clearRect(0,0,W,H);cubes.forEach(c=>drawCube(c));pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.color+p.a+')';ctx.fill();});requestAnimationFrame(bgAnim);}
+bgAnim();
+
+const tools=[
+  {name:'ChatGPT',maker:'OpenAI',logo:'🤖',tc:'#00f0ff',price:'Free / $20 mo',pricing:'freemium',desc:'Most popular AI chatbot. Great for general tasks, writing, coding, and brainstorming. GPT-4o available on free plan.',tags:['writing','coding','study','business','image'],ratings:{Speed:85,Accuracy:88,Writing:90,Coding:92,Free:60},best:'General use — best starting point for beginners.',winner:false,link:'https://chat.openai.com'},
+  {name:'Claude',maker:'Anthropic',logo:'🧠',tc:'#7b2fff',price:'Free / $20 mo',pricing:'freemium',desc:'Best for long documents, deep analysis, and nuanced writing. Largest context window. Honest and thoughtful responses.',tags:['writing','study','business'],ratings:{Speed:82,Accuracy:92,Writing:95,Coding:85,Free:65},best:'Long documents, essays, analysis, and coding.',winner:true,link:'https://claude.ai'},
+  {name:'Gemini',maker:'Google',logo:'✨',tc:'#ff2f7b',price:'Free / $20 mo',pricing:'freemium',desc:"Google's AI. Best integrated with Google Workspace. Strong at research with real-time web access.",tags:['writing','study','business'],ratings:{Speed:88,Accuracy:85,Writing:82,Coding:80,Free:80},best:'Google Workspace users and real-time research.',winner:false,link:'https://gemini.google.com'},
+  {name:'Copilot',maker:'Microsoft',logo:'🪟',tc:'#00ff88',price:'Free / $30 mo',pricing:'freemium',desc:'Best AI for Microsoft 365 users. Integrated into Word, Excel, PowerPoint. Free DALL-E image generation.',tags:['writing','coding','image','business'],ratings:{Speed:80,Accuracy:82,Writing:80,Coding:88,Free:75},best:'Microsoft Office users and Windows power users.',winner:false,link:'https://copilot.microsoft.com'},
+  {name:'Perplexity',maker:'Perplexity AI',logo:'🔍',tc:'#f59e0b',price:'Free / $20 mo',pricing:'freemium',desc:'Best AI search engine. Always up-to-date with citations. Perfect for research and fact-checking.',tags:['study','business'],ratings:{Speed:92,Accuracy:90,Writing:78,Coding:70,Free:82},best:'Research, fact-checking, and current events.',winner:false,link:'https://perplexity.ai'},
+  {name:'Llama',maker:'Meta AI',logo:'🦙',tc:'#00f0ff',price:'100% Free',pricing:'free',desc:'Open-source AI you can run locally. Best for privacy-conscious users. No data sent to servers.',tags:['coding','business'],ratings:{Speed:75,Accuracy:80,Writing:75,Coding:82,Free:100},best:'Privacy, offline use, and developer customization.',winner:false,link:'https://ollama.ai'},
+  {name:'Midjourney',maker:'Midjourney Inc',logo:'🎨',tc:'#7b2fff',price:'$10-$30 mo',pricing:'paid',desc:'Best AI image generator. Photorealistic and artistic images. Used by professionals worldwide.',tags:['image','business'],ratings:{Speed:70,Accuracy:88,Writing:0,Coding:0,Free:0},best:'Professional image generation and creative projects.',winner:false,link:'https://midjourney.com'},
+  {name:'GitHub Copilot',maker:'GitHub / OpenAI',logo:'💻',tc:'#00ff88',price:'Free for students',pricing:'freemium',desc:'Best AI coding assistant. Inline suggestions in VS Code, JetBrains. Free for students with GitHub Education.',tags:['coding'],ratings:{Speed:90,Accuracy:88,Writing:60,Coding:97,Free:70},best:'Developers — especially students (free with education pack).',winner:false,link:'https://github.com/features/copilot'},
+];
+
+function renderTools(filter){
+  const grid=document.getElementById('toolsGrid');
+  grid.innerHTML='';
+  const filtered=filter==='all'?tools:filter==='free'?tools.filter(t=>t.pricing==='free'):tools.filter(t=>t.tags.includes(filter));
+  filtered.forEach(tool=>{
+    const card=document.createElement('div');
+    card.className='tool-card';
+    card.style.setProperty('--tc',tool.tc);
+    const rHTML=Object.entries(tool.ratings).map(([k,v])=>`<div class="rating-row"><span class="rating-label">${k}</span><div class="rating-track"><div class="rating-fill" style="background:${tool.tc}" data-val="${v}"></div></div><span class="rating-val">${v}</span></div>`).join('');
+    const tHTML=tool.tags.map(t=>`<span class="tag highlight">${t}</span>`).join('');
+    card.innerHTML=`${tool.winner?'<div class="winner-badge">⭐ TOP PICK</div>':''}<div class="tool-header"><div class="tool-logo">${tool.logo}</div><div><div class="tool-name">${tool.name}</div><div class="tool-maker">${tool.maker}</div></div><span class="tool-badge badge-${tool.pricing}">${tool.pricing.toUpperCase()}</span></div><div class="tool-desc">${tool.desc}</div><div class="ratings">${rHTML}</div><div class="tool-tags">${tHTML}</div><div class="best-for">🎯 <span>Best for:</span> ${tool.best}</div><div class="price-row"><span class="price">${tool.price}</span><a href="${tool.link}" target="_blank" class="try-btn">TRY IT →</a></div>`;
+    grid.appendChild(card);
+    card.addEventListener('mousemove',e=>{const r=card.getBoundingClientRect();const x=(e.clientX-r.left)/r.width-.5;const y=(e.clientY-r.top)/r.height-.5;card.style.transform=`perspective(800px) rotateX(${-y*8}deg) rotateY(${x*8}deg) translateY(-8px)`;});
+    card.addEventListener('mouseleave',()=>{card.style.transform='';});
+  });
+  setTimeout(()=>{document.querySelectorAll('.rating-fill').forEach(b=>{b.style.width=b.dataset.val+'%';});},100);
+}
+
+function filterTools(filter,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTools(filter);
+}
+renderTools('all');
+</script>
+</body>
+</html>
