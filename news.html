@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Alpha1 — AI News Feed</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Syne:wght@400;600;800&family=Space+Mono&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#020408;--bg2:#060d14;--neon:#00f0ff;--neon2:#7b2fff;--neon3:#ff2f7b;--neon4:#00ff88;--text:#e8f4ff;--muted:#5a7a8a;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;overflow-x:hidden;}
+  #bg-3d{position:fixed;inset:0;z-index:0;pointer-events:none;}
+  .grid-lines{position:fixed;inset:0;background-image:linear-gradient(rgba(0,240,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,0.02) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 6%;background:rgba(2,4,8,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,240,255,0.1);}
+  .nav-logo{font-family:'Orbitron',monospace;font-weight:900;font-size:1.1rem;color:var(--neon);text-shadow:0 0 20px var(--neon);letter-spacing:3px;text-decoration:none;}
+  .nav-back{font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--muted);text-decoration:none;letter-spacing:2px;text-transform:uppercase;transition:color .2s;}
+  .nav-back:hover{color:var(--neon);}
+
+  .hero{position:relative;z-index:1;text-align:center;padding:8rem 2rem 3rem;}
+  .hero-badge{display:inline-flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:4px;color:var(--neon);text-transform:uppercase;border:1px solid rgba(0,240,255,0.2);padding:7px 20px;margin-bottom:1.5rem;background:rgba(0,240,255,0.04);}
+  .badge-dot{width:6px;height:6px;background:var(--neon);border-radius:50%;box-shadow:0 0 8px var(--neon);animation:blink 1.5s infinite;}
+  .live-dot{width:8px;height:8px;background:#00ff88;border-radius:50%;box-shadow:0 0 10px #00ff88;animation:blink 1.5s infinite;}
+  .hero h1{font-family:'Orbitron',monospace;font-size:clamp(1.8rem,5vw,4rem);font-weight:900;line-height:1.1;margin-bottom:1rem;}
+  .l1{display:block;color:var(--text);letter-spacing:3px;}
+  .l2{display:block;background:linear-gradient(90deg,var(--neon),var(--neon2),var(--neon3),var(--neon));background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gradientShift 4s linear infinite;}
+  .hero-sub{color:var(--muted);font-size:0.95rem;max-width:560px;margin:0 auto 1.5rem;}
+  .last-updated{font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--muted);letter-spacing:2px;}
+
+  /* FILTER */
+  .filter-wrap{position:relative;z-index:1;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:1rem 4% 2rem;}
+  .filter-btn{padding:8px 18px;font-family:'Space Mono',monospace;font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border:1px solid rgba(0,240,255,0.15);background:transparent;color:var(--muted);transition:all .25s;}
+  .filter-btn.active{background:rgba(0,240,255,0.1);color:var(--neon);border-color:rgba(0,240,255,0.4);}
+  .filter-btn:hover:not(.active){color:var(--text);border-color:rgba(0,240,255,0.25);}
+
+  /* NEWS GRID */
+  .content{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 4% 5rem;}
+  .news-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px;}
+
+  /* NEWS CARD */
+  .news-card{background:rgba(6,13,20,0.95);border:1px solid rgba(0,240,255,0.1);padding:0;position:relative;overflow:hidden;transition:transform .4s cubic-bezier(0.175,0.885,0.32,1.275),box-shadow .4s,border-color .3s;transform-style:preserve-3d;cursor:pointer;text-decoration:none;display:block;}
+  .news-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--tc,var(--neon)),transparent);transform:scaleX(0);transform-origin:left;transition:transform .4s;}
+  .news-card:hover{transform:perspective(800px) rotateX(3deg) rotateY(-2deg) translateY(-8px);border-color:var(--tc,var(--neon));box-shadow:0 20px 60px rgba(0,0,0,0.5),0 0 30px rgba(0,240,255,0.08);}
+  .news-card:hover::before{transform:scaleX(1);}
+  .news-img{width:100%;height:160px;object-fit:cover;display:block;filter:brightness(0.8);}
+  .news-img-placeholder{width:100%;height:160px;background:linear-gradient(135deg,rgba(0,240,255,0.05),rgba(123,47,255,0.05));display:flex;align-items:center;justify-content:center;font-size:2.5rem;}
+  .news-body{padding:20px;}
+  .news-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+  .news-source{font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--tc,var(--neon));letter-spacing:2px;text-transform:uppercase;border:1px solid var(--tc,var(--neon));padding:3px 8px;opacity:0.8;}
+  .news-date{font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--muted);letter-spacing:1px;}
+  .news-title{font-family:'Orbitron',monospace;font-size:0.88rem;font-weight:700;color:var(--text);line-height:1.4;margin-bottom:10px;}
+  .news-desc{font-size:0.82rem;color:var(--muted);line-height:1.65;margin-bottom:14px;}
+  .news-footer{display:flex;align-items:center;justify-content:space-between;}
+  .read-more{font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--tc,var(--neon));letter-spacing:2px;text-transform:uppercase;transition:gap .2s;display:flex;align-items:center;gap:6px;}
+  .news-card:hover .read-more{gap:10px;}
+  .news-tag{font-family:'Space Mono',monospace;font-size:0.58rem;color:var(--muted);border:1px solid rgba(255,255,255,0.08);padding:2px 8px;}
+
+  /* LOADING */
+  .loading-wrap{position:relative;z-index:1;text-align:center;padding:4rem 2rem;}
+  .loading-text{font-family:'Space Mono',monospace;font-size:0.75rem;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:1rem;}
+  .loading-bar{width:200px;height:2px;background:rgba(0,240,255,0.1);margin:0 auto;overflow:hidden;}
+  .loading-fill{height:100%;background:linear-gradient(90deg,var(--neon),var(--neon2));animation:loading 1.5s ease-in-out infinite;}
+  @keyframes loading{0%{transform:translateX(-100%);}100%{transform:translateX(200%);}}
+
+  /* FEATURED */
+  .featured-card{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:0;}
+  @media(max-width:700px){.featured-card{grid-template-columns:1fr;}}
+  .featured-card .news-img,.featured-card .news-img-placeholder{height:250px;}
+  .featured-badge{position:absolute;top:16px;left:16px;font-family:'Orbitron',monospace;font-size:0.6rem;letter-spacing:2px;color:var(--bg);background:linear-gradient(135deg,var(--neon),var(--neon2));padding:5px 12px;font-weight:700;z-index:1;}
+
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+  @keyframes gradientShift{0%{background-position:0%;}100%{background-position:200%;}}
+</style>
+</head>
+<body>
+<canvas id="bg-3d"></canvas>
+<div class="grid-lines"></div>
+
+<nav>
+  <a href="https://atharv269169-maker.github.io/alpha0/" class="nav-logo">ALPHA1</a>
+  <a href="https://atharv269169-maker.github.io/alpha0/" class="nav-back">← Back to Site</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-badge"><span class="live-dot"></span> Live Feed — Auto Updated</div>
+  <h1><span class="l1">AI NEWS</span><span class="l2">FEED</span></h1>
+  <p class="hero-sub">Stay ahead of the curve. Latest AI news, breakthroughs, and tools — pulled fresh from top sources.</p>
+  <p class="last-updated" id="lastUpdated">// Loading latest news...</p>
+</div>
+
+<div class="filter-wrap">
+  <button class="filter-btn active" onclick="filterNews('all',this)">All News</button>
+  <button class="filter-btn" onclick="filterNews('openai',this)">OpenAI</button>
+  <button class="filter-btn" onclick="filterNews('google',this)">Google AI</button>
+  <button class="filter-btn" onclick="filterNews('tools',this)">New Tools</button>
+  <button class="filter-btn" onclick="filterNews('research',this)">Research</button>
+  <button class="filter-btn" onclick="filterNews('india',this)">India AI</button>
+</div>
+
+<div id="loadingWrap" class="loading-wrap">
+  <div class="loading-text">Fetching latest AI news</div>
+  <div class="loading-bar"><div class="loading-fill"></div></div>
+</div>
+
+<div class="content" style="display:none" id="newsContent">
+  <div class="news-grid" id="newsGrid"></div>
+</div>
+
+<div style="text-align:center;padding:2rem 2rem 5rem;position:relative;z-index:1;">
+  <a href="https://atharv269169-maker.github.io/alpha0/#waitlist" style="display:inline-flex;align-items:center;gap:8px;background:var(--neon);color:var(--bg);padding:14px 36px;font-family:'Orbitron',monospace;font-weight:700;font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;box-shadow:0 0 30px rgba(0,240,255,0.3);">🚀 Join Alpha1 Waitlist</a>
+</div>
+
+<script>
+// 3D BG
+const canvas=document.getElementById('bg-3d');
+const ctx=canvas.getContext('2d');
+let W,H;
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+const cubes=Array.from({length:4},(_,i)=>({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,size:Math.random()*50+25,rotX:Math.random()*Math.PI*2,rotY:Math.random()*Math.PI*2,rotZ:Math.random()*Math.PI*2,vX:(Math.random()-.5)*.004,vY:(Math.random()-.5)*.004,vZ:(Math.random()-.5)*.004,color:['rgba(0,240,255,','rgba(123,47,255,','rgba(0,255,136,','rgba(255,47,123,'][i%4],opacity:.05}));
+const pts=Array.from({length:60},()=>({x:Math.random()*3000,y:Math.random()*3000,r:Math.random()*1.2+.3,vx:(Math.random()-.5)*.2,vy:(Math.random()-.5)*.2,color:['rgba(0,240,255,','rgba(123,47,255,'][Math.floor(Math.random()*2)],a:Math.random()*.15+.03}));
+function project(x,y,z,cx,cy){const f=400,s=f/(f+z);return{x:cx+x*s,y:cy+y*s};}
+function drawCube(c){const s=c.size,p3=[[-s,-s,-s],[s,-s,-s],[s,s,-s],[-s,s,-s],[-s,-s,s],[s,-s,s],[s,s,s],[-s,s,s]];const p=p3.map(([x,y,z])=>{let ny=y*Math.cos(c.rotX)-z*Math.sin(c.rotX),nz=y*Math.sin(c.rotX)+z*Math.cos(c.rotX);y=ny;z=nz;let nx=x*Math.cos(c.rotY)+z*Math.sin(c.rotY);nz=-x*Math.sin(c.rotY)+z*Math.cos(c.rotY);x=nx;z=nz;nx=x*Math.cos(c.rotZ)-y*Math.sin(c.rotZ);ny=x*Math.sin(c.rotZ)+y*Math.cos(c.rotZ);return project(nx,ny,z,c.x,c.y);});[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]].forEach(([a,b])=>{ctx.beginPath();ctx.moveTo(p[a].x,p[a].y);ctx.lineTo(p[b].x,p[b].y);ctx.strokeStyle=c.color+c.opacity+')';ctx.lineWidth=.8;ctx.stroke();});c.rotX+=c.vX;c.rotY+=c.vY;c.rotZ+=c.vZ;}
+function bgAnim(){ctx.clearRect(0,0,W,H);cubes.forEach(c=>drawCube(c));pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.color+p.a+')';ctx.fill();});requestAnimationFrame(bgAnim);}
+bgAnim();
+
+// NEWS SOURCES via RSS2JSON (free service)
+const sources = [
+  { url: 'https://techcrunch.com/category/artificial-intelligence/feed/', name: 'TechCrunch', color: '#00f0ff', tags: ['tools','research'] },
+  { url: 'https://feeds.feedburner.com/venturebeat/SZYF', name: 'VentureBeat', color: '#7b2fff', tags: ['tools','openai'] },
+  { url: 'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml', name: 'The Verge', color: '#ff2f7b', tags: ['tools','google'] },
+  { url: 'https://blog.google/technology/ai/rss/', name: 'Google AI', color: '#00ff88', tags: ['google','research'] },
+];
+
+let allNews = [];
+let currentFilter = 'all';
+
+const emojis = ['🤖','⚡','🧠','🚀','🔮','💡','🌐','🎯','⚙️','🔬'];
+
+async function fetchFeed(source) {
+  try {
+    const api = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(source.url)}&count=6`;
+    const res = await fetch(api);
+    const data = await res.json();
+    if (data.status !== 'ok') return [];
+    return data.items.map((item, i) => ({
+      title: item.title,
+      desc: item.description ? item.description.replace(/<[^>]+>/g, '').substring(0, 120) + '...' : '',
+      link: item.link,
+      date: new Date(item.pubDate).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}),
+      image: item.thumbnail || item.enclosure?.link || null,
+      source: source.name,
+      color: source.color,
+      tags: source.tags,
+      emoji: emojis[Math.floor(Math.random() * emojis.length)],
+      featured: i === 0
+    }));
+  } catch(e) {
+    return [];
+  }
+}
+
+async function loadNews() {
+  const results = await Promise.allSettled(sources.map(s => fetchFeed(s)));
+  results.forEach(r => {
+    if (r.status === 'fulfilled') allNews.push(...r.value);
+  });
+
+  // Sort by date
+  allNews.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  if (allNews.length === 0) {
+    // Fallback curated news if RSS fails
+    allNews = getFallbackNews();
+  }
+
+  document.getElementById('lastUpdated').textContent = `// Last updated: ${new Date().toLocaleTimeString('en-IN')} · ${allNews.length} articles loaded`;
+  document.getElementById('loadingWrap').style.display = 'none';
+  document.getElementById('newsContent').style.display = 'block';
+  renderNews('all');
+}
+
+function getFallbackNews() {
+  return [
+    {title:'GPT-4o Gets Major Update With Better Reasoning',desc:'OpenAI rolls out significant improvements to GPT-4o, featuring enhanced reasoning capabilities and faster response times across all platforms.',link:'https://openai.com',date:'Today',image:null,source:'OpenAI Blog',color:'#00f0ff',tags:['openai'],emoji:'🤖',featured:true},
+    {title:'Google DeepMind Releases Gemini 1.5 Flash Update',desc:'Google DeepMind announces improvements to Gemini 1.5 Flash with extended context window and better multimodal understanding.',link:'https://deepmind.google',date:'Today',image:null,source:'Google AI',color:'#00ff88',tags:['google','research'],emoji:'✨',featured:false},
+    {title:'Anthropic Claude 3.5 Sonnet Tops Coding Benchmarks',desc:'Claude 3.5 Sonnet achieves state-of-the-art performance on SWE-bench, outperforming all other models in software engineering tasks.',link:'https://anthropic.com',date:'Yesterday',image:null,source:'TechCrunch',color:'#7b2fff',tags:['tools','research'],emoji:'🧠',featured:false},
+    {title:'Meta Llama 3.1 Now Available for Download',desc:'Meta releases Llama 3.1 with 405B parameters — the largest open-source model ever. Available for free download and local deployment.',link:'https://llama.meta.com',date:'Yesterday',image:null,source:'VentureBeat',color:'#ff2f7b',tags:['tools','research'],emoji:'🦙',featured:false},
+    {title:'India Launches National AI Mission with ₹10,000 Cr Budget',desc:'The Government of India announces a comprehensive National AI Mission to position India as a global AI powerhouse by 2030.',link:'https://pib.gov.in',date:'2 days ago',image:null,source:'Economic Times',color:'#f59e0b',tags:['india'],emoji:'🇮🇳',featured:false},
+    {title:'Perplexity AI Raises $250M at $3B Valuation',desc:'AI search startup Perplexity AI closes a massive funding round, signaling investor confidence in AI-powered search as a Google alternative.',link:'https://perplexity.ai',date:'2 days ago',image:null,source:'The Verge',color:'#00f0ff',tags:['tools'],emoji:'🔍',featured:false},
+    {title:'OpenAI o1 Model Now Available to All ChatGPT Plus Users',desc:'OpenAI\'s advanced reasoning model o1 is now accessible to all Plus subscribers, bringing PhD-level problem-solving to more users.',link:'https://openai.com',date:'3 days ago',image:null,source:'OpenAI Blog',color:'#00f0ff',tags:['openai','tools'],emoji:'⚡',featured:false},
+    {title:'New AI Tool Lets Students Generate Personalized Study Plans',desc:'A new crop of EdTech startups is using AI to create hyper-personalized study plans based on individual learning patterns and exam schedules.',link:'https://techcrunch.com',date:'3 days ago',image:null,source:'TechCrunch',color:'#00ff88',tags:['tools','india'],emoji:'📚',featured:false},
+    {title:'Microsoft Copilot Gets Real-Time Voice Assistant Features',desc:'Microsoft updates Copilot with natural voice conversation capabilities, making it a direct competitor to Apple\'s Siri and Google Assistant.',link:'https://microsoft.com',date:'4 days ago',image:null,source:'The Verge',color:'#7b2fff',tags:['tools','google'],emoji:'🎙️',featured:false},
+    {title:'AI Generates Code 10x Faster Than Human Developers',desc:'New research from Stanford shows AI-assisted coding tools can increase developer productivity by up to 10x for routine programming tasks.',link:'https://stanford.edu',date:'4 days ago',image:null,source:'Research Paper',color:'#ff2f7b',tags:['research'],emoji:'💻',featured:false},
+    {title:'IIT Bombay Launches Free AI Certificate Course for Students',desc:'IIT Bombay partners with industry leaders to offer a comprehensive free AI certificate program, targeting 1 million students by 2025.',link:'https://iitb.ac.in',date:'5 days ago',image:null,source:'Times of India',color:'#f59e0b',tags:['india'],emoji:'🎓',featured:false},
+    {title:'Stable Diffusion 3 Launches with Photorealistic Output',desc:'Stability AI releases Stable Diffusion 3 with dramatically improved photorealism and text rendering, challenging Midjourney\'s dominance.',link:'https://stability.ai',date:'5 days ago',image:null,source:'VentureBeat',color:'#7b2fff',tags:['tools','research'],emoji:'🎨',featured:false},
+  ];
+}
+
+function renderNews(filter) {
+  const grid = document.getElementById('newsGrid');
+  grid.innerHTML = '';
+  const filtered = filter === 'all' ? allNews : allNews.filter(n => n.tags.includes(filter));
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted);font-family:Space Mono,monospace;font-size:0.8rem;letter-spacing:2px;">NO NEWS FOUND FOR THIS FILTER</div>';
+    return;
+  }
+
+  filtered.forEach((item, i) => {
+    const card = document.createElement('a');
+    card.href = item.link;
+    card.target = '_blank';
+    card.className = 'news-card' + (i === 0 && filter === 'all' ? ' featured-card' : '');
+    card.style.setProperty('--tc', item.color);
+
+    const imgHtml = item.image
+      ? `<img class="news-img" src="${item.image}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+      : '';
+    const placeholderHtml = `<div class="news-img-placeholder" ${item.image ? 'style="display:none"' : ''}>${item.emoji}</div>`;
+
+    card.innerHTML = `
+      ${i === 0 && filter === 'all' ? '<div class="featured-badge">⭐ TOP STORY</div>' : ''}
+      ${imgHtml}${placeholderHtml}
+      <div class="news-body">
+        <div class="news-meta">
+          <span class="news-source">${item.source}</span>
+          <span class="news-date">${item.date}</span>
+        </div>
+        <div class="news-title">${item.title}</div>
+        <div class="news-desc">${item.desc}</div>
+        <div class="news-footer">
+          <span class="read-more">Read More →</span>
+          <span class="news-tag">${item.tags[0]}</span>
+        </div>
+      </div>`;
+
+    grid.appendChild(card);
+
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = `perspective(800px) rotateX(${-y*5}deg) rotateY(${x*5}deg) translateY(-8px)`;
+    });
+    card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+  });
+}
+
+function filterNews(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderNews(filter);
+}
+
+loadNews();
+</script>
+</body>
+</html>
