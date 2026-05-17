@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Alpha1 — Prompt Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Syne:wght@400;600;800&family=Space+Mono&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#020408;--bg2:#060d14;--neon:#00f0ff;--neon2:#7b2fff;--neon3:#ff2f7b;--neon4:#00ff88;--text:#e8f4ff;--muted:#5a7a8a;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;overflow-x:hidden;min-height:100vh;}
+  #bg-3d{position:fixed;inset:0;z-index:0;pointer-events:none;}
+  .grid-lines{position:fixed;inset:0;background-image:linear-gradient(rgba(0,240,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,0.02) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 6%;background:rgba(2,4,8,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,240,255,0.1);}
+  .nav-logo{font-family:'Orbitron',monospace;font-weight:900;font-size:1.1rem;color:var(--neon);text-shadow:0 0 20px var(--neon);letter-spacing:3px;text-decoration:none;}
+  .nav-back{font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--muted);text-decoration:none;letter-spacing:2px;text-transform:uppercase;transition:color .2s;}
+  .nav-back:hover{color:var(--neon);}
+  .page{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:7rem 4% 5rem;}
+  .hero{text-align:center;margin-bottom:3rem;}
+  .hero-badge{display:inline-flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:4px;color:var(--neon);text-transform:uppercase;border:1px solid rgba(0,240,255,0.2);padding:7px 20px;margin-bottom:1.5rem;background:rgba(0,240,255,0.04);}
+  .badge-dot{width:6px;height:6px;background:var(--neon);border-radius:50%;box-shadow:0 0 8px var(--neon);animation:blink 1.5s infinite;}
+  .hero h1{font-family:'Orbitron',monospace;font-size:clamp(1.8rem,5vw,3.5rem);font-weight:900;line-height:1.1;margin-bottom:1rem;}
+  .l1{display:block;color:var(--text);letter-spacing:3px;}
+  .l2{display:block;background:linear-gradient(90deg,var(--neon),var(--neon2),var(--neon3),var(--neon));background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gradientShift 4s linear infinite;}
+  .hero-sub{color:var(--muted);font-size:0.95rem;max-width:500px;margin:0 auto;}
+  .gen-card{background:rgba(6,13,20,0.95);border:1px solid rgba(0,240,255,0.15);padding:2rem;margin-bottom:1.5rem;}
+  .field-label{font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--neon);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;display:block;}
+  .cat-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.5rem;}
+  .cat-pill{padding:7px 16px;font-family:'Space Mono',monospace;font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border:1px solid rgba(0,240,255,0.15);background:transparent;color:var(--muted);transition:all .2s;}
+  .cat-pill.active{background:rgba(0,240,255,0.1);color:var(--neon);border-color:rgba(0,240,255,0.4);}
+  .cat-pill:hover:not(.active){color:var(--text);border-color:rgba(0,240,255,0.25);}
+  .topic-input{width:100%;background:rgba(0,240,255,0.04);border:1px solid rgba(0,240,255,0.2);color:var(--text);padding:16px 20px;font-family:'Syne',sans-serif;font-size:1rem;outline:none;transition:border-color .2s,box-shadow .2s;margin-bottom:1.5rem;}
+  .topic-input:focus{border-color:var(--neon);box-shadow:0 0 20px rgba(0,240,255,0.1);}
+  .topic-input::placeholder{color:var(--muted);}
+  .options-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:1.5rem;}
+  .select-wrap{position:relative;}
+  .ai-select{width:100%;background:rgba(0,240,255,0.04);border:1px solid rgba(0,240,255,0.2);color:var(--text);padding:12px 16px;font-family:'Space Mono',monospace;font-size:0.72rem;letter-spacing:1px;outline:none;cursor:pointer;appearance:none;transition:border-color .2s;}
+  .ai-select:focus{border-color:var(--neon);}
+  .ai-select option{background:#060d14;color:var(--text);}
+  .select-arrow{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--neon);pointer-events:none;font-size:0.7rem;}
+  .gen-btn{width:100%;background:linear-gradient(135deg,var(--neon2),var(--neon));color:var(--bg);border:none;padding:18px;font-family:'Orbitron',monospace;font-weight:700;font-size:0.85rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all .3s;box-shadow:0 0 30px rgba(0,240,255,0.2);}
+  .gen-btn:hover{box-shadow:0 0 50px rgba(0,240,255,0.5);transform:translateY(-2px);}
+  .result-card{display:none;background:rgba(6,13,20,0.95);border:1px solid rgba(0,240,255,0.2);padding:2rem;position:relative;overflow:hidden;margin-bottom:1.5rem;}
+  .result-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--neon),var(--neon2),var(--neon3));}
+  .result-label{font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--neon);letter-spacing:3px;text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:8px;}
+  .result-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(0,240,255,0.3),transparent);}
+  .result-text{font-family:'Space Mono',monospace;font-size:0.82rem;color:#b0d4e0;line-height:1.8;white-space:pre-wrap;margin-bottom:1.5rem;}
+  .result-actions{display:flex;gap:12px;flex-wrap:wrap;}
+  .action-btn{padding:10px 20px;font-family:'Orbitron',monospace;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;border:1px solid;}
+  .copy-action{background:rgba(0,240,255,0.08);border-color:rgba(0,240,255,0.3);color:var(--neon);}
+  .copy-action:hover{background:rgba(0,240,255,0.18);}
+  .copy-action.copied{color:var(--neon4);border-color:var(--neon4);}
+  .regen-action{background:rgba(123,47,255,0.08);border-color:rgba(123,47,255,0.3);color:var(--neon2);}
+  .regen-action:hover{background:rgba(123,47,255,0.18);}
+  .examples-section{margin-bottom:1.5rem;}
+  .examples-title{font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:1rem;}
+  .example-chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .example-chip{padding:6px 14px;font-family:'Space Mono',monospace;font-size:0.62rem;letter-spacing:1px;cursor:pointer;border:1px solid rgba(123,47,255,0.2);background:rgba(123,47,255,0.05);color:var(--muted);transition:all .2s;}
+  .example-chip:hover{border-color:var(--neon2);color:var(--neon2);background:rgba(123,47,255,0.1);}
+  .history-section{margin-bottom:2rem;}
+  .history-header{font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;}
+  .clear-btn{font-size:0.6rem;color:var(--neon3);cursor:pointer;border:1px solid rgba(255,47,123,0.2);padding:3px 10px;background:transparent;font-family:'Space Mono',monospace;letter-spacing:1px;}
+  .history-list{display:flex;flex-direction:column;gap:8px;}
+  .history-item{background:rgba(6,13,20,0.8);border:1px solid rgba(0,240,255,0.08);padding:12px 16px;cursor:pointer;transition:all .2s;font-size:0.78rem;color:var(--muted);}
+  .history-item:hover{border-color:rgba(0,240,255,0.2);color:var(--text);}
+  .h-cat{font-family:'Orbitron',monospace;font-size:0.58rem;color:var(--neon2);margin-bottom:4px;letter-spacing:1px;}
+  .footer-cta{text-align:center;padding:2rem 0;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+  @keyframes gradientShift{0%{background-position:0%;}100%{background-position:200%;}}
+</style>
+</head>
+<body>
+<canvas id="bg-3d"></canvas>
+<div class="grid-lines"></div>
+
+<nav>
+  <a href="https://atharv269169-maker.github.io/alpha0/" class="nav-logo">ALPHA1</a>
+  <a href="https://atharv269169-maker.github.io/alpha0/" class="nav-back">← Back to Site</a>
+</nav>
+
+<div class="page">
+  <div class="hero">
+    <div class="hero-badge"><span class="badge-dot"></span> Free Tool — Alpha1</div>
+    <h1><span class="l1">PROMPT</span><span class="l2">GENERATOR</span></h1>
+    <p class="hero-sub">Type your topic, pick a category — get the perfect AI prompt instantly. No blank pages ever again.</p>
+  </div>
+
+  <!-- EXAMPLES -->
+  <div class="examples-section">
+    <div class="examples-title">// Try These Examples</div>
+    <div class="example-chips">
+      <span class="example-chip" onclick="fillExample('Photosynthesis','study')">📚 Photosynthesis</span>
+      <span class="example-chip" onclick="fillExample('Instagram marketing','business')">📈 Instagram Marketing</span>
+      <span class="example-chip" onclick="fillExample('Python loops','coding')">💻 Python Loops</span>
+      <span class="example-chip" onclick="fillExample('Climate change essay','writing')">✍️ Climate Change Essay</span>
+      <span class="example-chip" onclick="fillExample('Job interview preparation','career')">💼 Job Interview</span>
+      <span class="example-chip" onclick="fillExample('Morning productivity routine','productivity')">⚡ Morning Routine</span>
+    </div>
+  </div>
+
+  <!-- GENERATOR -->
+  <div class="gen-card">
+    <span class="field-label">// Select Category</span>
+    <div class="cat-pills">
+      <button class="cat-pill active" onclick="selectCat('study',this)">📚 Study</button>
+      <button class="cat-pill" onclick="selectCat('writing',this)">✍️ Writing</button>
+      <button class="cat-pill" onclick="selectCat('coding',this)">💻 Coding</button>
+      <button class="cat-pill" onclick="selectCat('business',this)">📈 Business</button>
+      <button class="cat-pill" onclick="selectCat('career',this)">💼 Career</button>
+      <button class="cat-pill" onclick="selectCat('creative',this)">🎨 Creative</button>
+      <button class="cat-pill" onclick="selectCat('productivity',this)">⚡ Productivity</button>
+      <button class="cat-pill" onclick="selectCat('social',this)">📱 Social Media</button>
+    </div>
+
+    <span class="field-label">// Your Topic</span>
+    <input class="topic-input" id="topicInput" type="text" placeholder="e.g. Photosynthesis, Python loops, Instagram marketing..." />
+
+    <div class="options-row">
+      <div class="select-wrap">
+        <span class="field-label">// Tone</span>
+        <select class="ai-select" id="toneSelect">
+          <option value="detailed">Detailed & Thorough</option>
+          <option value="simple">Simple & Easy</option>
+          <option value="professional">Professional</option>
+          <option value="creative">Creative</option>
+          <option value="concise">Concise & Quick</option>
+        </select>
+        <span class="select-arrow">▼</span>
+      </div>
+      <div class="select-wrap">
+        <span class="field-label">// Output Style</span>
+        <select class="ai-select" id="styleSelect">
+          <option value="explain">Explain to me</option>
+          <option value="list">Step-by-step list</option>
+          <option value="examples">With examples</option>
+          <option value="quiz">Quiz / Test me</option>
+          <option value="summary">Summary</option>
+          <option value="rewrite">Rewrite / Improve</option>
+        </select>
+        <span class="select-arrow">▼</span>
+      </div>
+    </div>
+
+    <button class="gen-btn" onclick="generatePrompt()">⚡ GENERATE PROMPT</button>
+  </div>
+
+  <!-- RESULT -->
+  <div class="result-card" id="resultCard">
+    <div class="result-label">// Generated Prompt</div>
+    <div class="result-text" id="resultText"></div>
+    <div class="result-actions">
+      <button class="action-btn copy-action" id="copyBtn" onclick="copyResult()">📋 COPY PROMPT</button>
+      <button class="action-btn regen-action" onclick="generatePrompt()">🔄 REGENERATE</button>
+      <button class="action-btn" style="background:rgba(0,255,136,0.08);border-color:rgba(0,255,136,0.3);color:var(--neon4);" onclick="saveToHistory()">💾 SAVE</button>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="history-section" id="historySection" style="display:none;">
+    <div class="history-header">
+      <span>// Saved Prompts</span>
+      <button class="clear-btn" onclick="clearHistory()">CLEAR ALL</button>
+    </div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
+  <div class="footer-cta">
+    <a href="https://atharv269169-maker.github.io/alpha0/#waitlist" style="display:inline-flex;align-items:center;gap:8px;background:var(--neon);color:var(--bg);padding:14px 36px;font-family:'Orbitron',monospace;font-weight:700;font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;box-shadow:0 0 30px rgba(0,240,255,0.3);">🚀 Join Alpha1 Waitlist</a>
+  </div>
+</div>
+
+<script>
+// 3D BG
+const canvas=document.getElementById('bg-3d');
+const ctx=canvas.getContext('2d');
+let W,H;
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+const cubes=Array.from({length:4},(_,i)=>({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,size:Math.random()*50+25,rotX:Math.random()*Math.PI*2,rotY:Math.random()*Math.PI*2,rotZ:Math.random()*Math.PI*2,vX:(Math.random()-.5)*.004,vY:(Math.random()-.5)*.004,vZ:(Math.random()-.5)*.004,color:['rgba(0,240,255,','rgba(123,47,255,','rgba(0,255,136,','rgba(255,47,123,'][i%4],opacity:.05}));
+const pts=Array.from({length:60},()=>({x:Math.random()*3000,y:Math.random()*3000,r:Math.random()*1.2+.3,vx:(Math.random()-.5)*.2,vy:(Math.random()-.5)*.2,color:['rgba(0,240,255,','rgba(123,47,255,'][Math.floor(Math.random()*2)],a:Math.random()*.15+.03}));
+function project(x,y,z,cx,cy){const f=400,s=f/(f+z);return{x:cx+x*s,y:cy+y*s};}
+function drawCube(c){const s=c.size,p3=[[-s,-s,-s],[s,-s,-s],[s,s,-s],[-s,s,-s],[-s,-s,s],[s,-s,s],[s,s,s],[-s,s,s]];const p=p3.map(([x,y,z])=>{let ny=y*Math.cos(c.rotX)-z*Math.sin(c.rotX),nz=y*Math.sin(c.rotX)+z*Math.cos(c.rotX);y=ny;z=nz;let nx=x*Math.cos(c.rotY)+z*Math.sin(c.rotY);nz=-x*Math.sin(c.rotY)+z*Math.cos(c.rotY);x=nx;z=nz;nx=x*Math.cos(c.rotZ)-y*Math.sin(c.rotZ);ny=x*Math.sin(c.rotZ)+y*Math.cos(c.rotZ);return project(nx,ny,z,c.x,c.y);});[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]].forEach(([a,b])=>{ctx.beginPath();ctx.moveTo(p[a].x,p[a].y);ctx.lineTo(p[b].x,p[b].y);ctx.strokeStyle=c.color+c.opacity+')';ctx.lineWidth=.8;ctx.stroke();});c.rotX+=c.vX;c.rotY+=c.vY;c.rotZ+=c.vZ;}
+function bgAnim(){ctx.clearRect(0,0,W,H);cubes.forEach(c=>drawCube(c));pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.color+p.a+')';ctx.fill();});requestAnimationFrame(bgAnim);}
+bgAnim();
+
+// GENERATOR LOGIC
+let currentCat = 'study';
+let history = JSON.parse(localStorage.getItem('alpha1_prompts') || '[]');
+
+const templates = {
+  study: {
+    explain: (t,tone) => `Explain ${t} to me like I'm a student. Give me:\n- Key concepts in bullet points\n- A real-world example I can relate to\n- The 3 most important things to remember\n- 2 practice questions to test my understanding\n${tone==='simple'?'Use simple language, avoid jargon.':tone==='detailed'?'Be thorough and comprehensive.':''}`,
+    list: (t,tone) => `Create a step-by-step study guide for ${t}:\n1. Start with the basic definition\n2. Break down the core components\n3. Show how each part connects\n4. Give a worked example\n5. End with a quick summary\n${tone==='simple'?'Keep each step short and clear.':'Make each step detailed and actionable.'}`,
+    examples: (t,tone) => `Teach me ${t} using only examples and analogies.\n- Give 3 different real-world analogies\n- Show how this concept appears in daily life\n- Give one example from each: science, technology, everyday life\n- End with the formal definition after I understand it through examples`,
+    quiz: (t,tone) => `Quiz me on ${t}. Create 10 questions:\n- 4 multiple choice questions\n- 3 short answer questions\n- 2 application questions\n- 1 "explain in your own words" question\nAfter I answer each, give me detailed feedback and the correct answer.`,
+    summary: (t,tone) => `Create a one-page revision summary of ${t}:\n📌 Key Definition:\n📌 Main Concepts (5 bullet points):\n📌 Important Formulas/Rules:\n📌 Common Exam Questions:\n📌 Memory Tricks:\n📌 Common Mistakes to Avoid:`,
+    rewrite: (t,tone) => `I have notes on ${t} but they're unclear. Help me:\n1. Identify the key points from what I've written\n2. Rewrite them in a clear, structured way\n3. Add any important information I might have missed\n4. Format it as proper study notes\n[Paste your notes below this prompt]`,
+  },
+  writing: {
+    explain: (t,tone) => `Help me write about ${t}.\nProvide:\n- A strong opening hook\n- 3 main arguments with supporting evidence\n- Counterarguments and rebuttals\n- A compelling conclusion\nTone: ${tone==='professional'?'formal and academic':tone==='creative'?'engaging and creative':'clear and informative'}`,
+    list: (t,tone) => `Create a detailed writing outline for ${t}:\n1. Title suggestions (3 options)\n2. Introduction structure\n3. Body paragraph topics (5 points)\n4. Evidence/examples for each point\n5. Conclusion approach\n6. SEO keywords to include`,
+    examples: (t,tone) => `Show me how to write about ${t} with examples:\n- Write an example opening paragraph\n- Show a strong body paragraph with evidence\n- Demonstrate how to use transitions\n- Write an example conclusion\nThen explain what makes each part effective.`,
+    quiz: (t,tone) => `Review my writing on ${t}. Check for:\n- Clarity and flow\n- Grammar and sentence structure\n- Argument strength\n- Evidence usage\n- Opening and closing impact\nGive specific suggestions to improve each section.\n[Paste your writing below]`,
+    summary: (t,tone) => `Summarize the key writing techniques for ${t} in under 300 words. Include: main arguments, strongest points, and what a reader should take away.`,
+    rewrite: (t,tone) => `Rewrite my content about ${t} to make it:\n- More engaging and readable\n- Better structured with clear flow\n- More persuasive and impactful\n- Free of grammar errors\nKeep my original meaning but elevate the quality.\n[Paste your content below]`,
+  },
+  coding: {
+    explain: (t,tone) => `Explain ${t} in programming:\n- What it is and why it's used\n- Syntax with a simple example\n- Common use cases (3 examples)\n- Common mistakes beginners make\n- Best practices\nInclude working code examples in the most popular language for this concept.`,
+    list: (t,tone) => `Create a step-by-step coding tutorial for ${t}:\n1. Prerequisites needed\n2. Setup/installation if required\n3. Basic implementation\n4. Add complexity step by step\n5. Complete working example\n6. How to test it\n7. Common errors and fixes`,
+    examples: (t,tone) => `Show me ${t} through practical examples:\n- Simple "Hello World" level example\n- Intermediate real-world use case\n- Advanced implementation\nFor each: show the code, explain every line, show the output.`,
+    quiz: (t,tone) => `Test my knowledge of ${t}:\n- 3 code reading questions (what does this output?)\n- 2 bug-finding challenges\n- 2 "write this code" challenges\n- 1 optimization challenge\nGive hints if I'm stuck, then show the solution.`,
+    summary: (t,tone) => `Create a quick reference cheat sheet for ${t}:\n📌 Syntax:\n📌 Key Methods/Functions:\n📌 Common Patterns:\n📌 Best Practices:\n📌 Things to Avoid:\n📌 One-liner examples:`,
+    rewrite: (t,tone) => `Review and improve this ${t} code:\n- Identify bugs and errors\n- Suggest performance improvements\n- Apply best practices\n- Add proper comments\n- Make it more readable\n[Paste your code below]`,
+  },
+  business: {
+    explain: (t,tone) => `Explain ${t} from a business perspective:\n- What it is and why it matters\n- How successful companies use it\n- Key metrics to measure success\n- Real company case study\n- How to implement it in a small business`,
+    list: (t,tone) => `Create an action plan for ${t}:\n1. Current situation analysis\n2. Goal setting (SMART goals)\n3. Step-by-step implementation\n4. Resources needed\n5. Timeline\n6. Success metrics\n7. Risk management`,
+    examples: (t,tone) => `Show me real examples of ${t} in business:\n- Large company example (Fortune 500)\n- Startup example\n- Small business example\nFor each: what they did, why it worked, and key lessons.`,
+    quiz: (t,tone) => `I want to improve my business understanding of ${t}. Ask me:\n- 3 conceptual questions\n- 2 scenario-based questions\n- 1 "how would you handle this?" question\nProvide detailed feedback and industry best practices.`,
+    summary: (t,tone) => `Create a business brief on ${t}:\n📌 Executive Summary:\n📌 Market Opportunity:\n📌 Key Strategies:\n📌 Implementation Steps:\n📌 Expected ROI:\n📌 Risks to Consider:`,
+    rewrite: (t,tone) => `Improve this business content about ${t}:\n- Make it more professional\n- Add data and statistics where appropriate\n- Strengthen the value proposition\n- Make it more compelling for investors/clients\n[Paste your content below]`,
+  },
+  career: {
+    explain: (t,tone) => `Help me understand ${t} for my career:\n- What skills are most in demand\n- Salary expectations and growth\n- How to break into this field\n- What a typical day looks like\n- Top companies hiring for this\n- Resources to learn more`,
+    list: (t,tone) => `Create a 90-day career plan for ${t}:\nDays 1-30: Foundation\nDays 31-60: Building skills\nDays 61-90: Getting opportunities\nFor each phase: specific actions, resources, and milestones.`,
+    examples: (t,tone) => `Show me real examples of ${t} in careers:\n- Entry level path\n- Mid-career transition\n- Senior level achievement\nFor each: what they did, timeline, and key decisions made.`,
+    quiz: (t,tone) => `Prepare me for ${t} with mock questions:\n- 5 common interview questions\n- 3 situational questions\n- 2 technical questions\n- 1 "tell me about yourself" tailored to this role\nGive me ideal answer frameworks for each.`,
+    summary: (t,tone) => `Create a career quick guide for ${t}:\n📌 Role Overview:\n📌 Required Skills:\n📌 How to Get Started:\n📌 Salary Range:\n📌 Growth Path:\n📌 Best Resources:`,
+    rewrite: (t,tone) => `Improve my ${t} related career materials:\n- Resume bullet points\n- LinkedIn summary\n- Cover letter opening\n- Professional bio\nMake them more impactful and keyword-optimized.\n[Paste your content below]`,
+  },
+  creative: {
+    explain: (t,tone) => `Help me create ${t}:\n- Give me 5 unique creative angles\n- Suggest an unexpected twist\n- Provide a mood/tone suggestion\n- Recommend a structure or format\n- Give an opening line to start with`,
+    list: (t,tone) => `Create a creative blueprint for ${t}:\n1. Concept and theme\n2. Target audience\n3. Unique selling point\n4. Structure/outline\n5. Key scenes/moments\n6. Ending options\n7. Title suggestions`,
+    examples: (t,tone) => `Show me creative examples for ${t}:\n- Minimalist approach\n- Bold and experimental approach\n- Classic/traditional approach\nFor each: show how it would look and explain the creative choices.`,
+    quiz: (t,tone) => `Challenge my creativity with ${t}:\n- Give me 3 creative constraints to work within\n- Suggest an unusual combination or mashup\n- Give me a "what if" scenario to explore\n- Ask me to explain my creative choices\nProvide feedback on originality and execution.`,
+    summary: (t,tone) => `Summarize the creative approach to ${t}:\n📌 Core Concept:\n📌 Style Elements:\n📌 What Makes it Stand Out:\n📌 Emotional Impact:\n📌 Target Audience:`,
+    rewrite: (t,tone) => `Elevate my creative work on ${t}:\n- Add more vivid descriptions\n- Strengthen the emotional impact\n- Improve the pacing and flow\n- Add unexpected elements\n- Make the ending more memorable\n[Paste your work below]`,
+  },
+  productivity: {
+    explain: (t,tone) => `Explain how to improve ${t} for maximum productivity:\n- Why most people struggle with this\n- The science behind it\n- Top 5 proven strategies\n- How to implement each strategy\n- How to track progress\n- Common pitfalls to avoid`,
+    list: (t,tone) => `Create a system to master ${t}:\n1. Assessment: Where am I now?\n2. Goal: Where do I want to be?\n3. Daily habits to build\n4. Weekly review process\n5. Tools and resources to use\n6. Accountability method\n7. 30-day milestone check`,
+    examples: (t,tone) => `Show me real examples of people who mastered ${t}:\n- Student example\n- Entrepreneur example\n- Professional example\nFor each: their specific system, tools they use, and results they got.`,
+    quiz: (t,tone) => `Help me audit my approach to ${t}:\n- Ask me 5 diagnostic questions\n- Identify my biggest bottleneck\n- Suggest one high-impact change\n- Create a 7-day experiment to test it\nProvide a framework to measure improvement.`,
+    summary: (t,tone) => `Create a productivity cheat sheet for ${t}:\n📌 Core Principle:\n📌 Daily Habit (5 min):\n📌 Weekly Habit (30 min):\n📌 Best Tool/App:\n📌 Key Metric to Track:\n📌 Quick Win to Start Today:`,
+    rewrite: (t,tone) => `Optimize my current approach to ${t}:\n- What I'm doing: [describe your current approach]\n- Identify inefficiencies\n- Suggest specific improvements\n- Create an optimized version of my system\n- Add automations or shortcuts\n[Describe your current process below]`,
+  },
+  social: {
+    explain: (t,tone) => `Create a social media strategy for ${t}:\n- Best platforms to use\n- Content types that perform best\n- Optimal posting frequency\n- Hashtag strategy\n- Engagement tactics\n- How to measure success`,
+    list: (t,tone) => `Create 10 social media post ideas for ${t}:\nFor each post:\n- Hook/opening line\n- Main content\n- Call to action\n- Best platform\n- Best time to post\n- Hashtags to use`,
+    examples: (t,tone) => `Show me viral-worthy content examples for ${t}:\n- Educational post\n- Entertainment post\n- Inspirational post\n- Behind-the-scenes post\n- User engagement post\nFor each: exact caption, visual description, why it would go viral.`,
+    quiz: (t,tone) => `Review my social media content for ${t}:\n- Hook strength (1-10)\n- Value delivered (1-10)\n- Call to action clarity\n- Hashtag relevance\n- Engagement potential\nGive specific rewrites for the weakest parts.\n[Paste your content below]`,
+    summary: (t,tone) => `Create a social media content calendar for ${t}:\n📌 Monday: Educational content\n📌 Wednesday: Engagement post\n📌 Friday: Inspirational/story\n📌 Weekend: Behind the scenes\nWith specific content ideas for each slot.`,
+    rewrite: (t,tone) => `Rewrite this social media content about ${t} to:\n- Make the hook impossible to scroll past\n- Increase value in every line\n- End with a strong CTA\n- Optimize for the algorithm\n- Make it shareable\n[Paste your content below]`,
+  },
+};
+
+const toneModifiers = {
+  detailed: 'Be extremely thorough and detailed in your response.',
+  simple: 'Use simple language. Assume I am a complete beginner.',
+  professional: 'Maintain a professional, formal tone throughout.',
+  creative: 'Be creative, engaging, and use interesting examples.',
+  concise: 'Be concise. Give me only what I absolutely need.',
+};
+
+let currentPrompt = '';
+
+function selectCat(cat, btn) {
+  currentCat = cat;
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function fillExample(topic, cat) {
+  document.getElementById('topicInput').value = topic;
+  currentCat = cat;
+  document.querySelectorAll('.cat-pill').forEach(p => {
+    p.classList.toggle('active', p.textContent.toLowerCase().includes(cat));
+  });
+  generatePrompt();
+}
+
+function generatePrompt() {
+  const topic = document.getElementById('topicInput').value.trim();
+  if (!topic) {
+    document.getElementById('topicInput').style.borderColor = 'var(--neon3)';
+    setTimeout(() => document.getElementById('topicInput').style.borderColor = '', 1500);
+    return;
+  }
+
+  const tone = document.getElementById('toneSelect').value;
+  const style = document.getElementById('styleSelect').value;
+
+  const catTemplates = templates[currentCat] || templates.study;
+  const styleFn = catTemplates[style] || catTemplates.explain;
+  let prompt = styleFn(topic, tone);
+
+  // Add tone modifier
+  prompt += '\n\n' + toneModifiers[tone];
+
+  currentPrompt = prompt;
+
+  // Show result with typewriter effect
+  const resultCard = document.getElementById('resultCard');
+  const resultText = document.getElementById('resultText');
+  resultCard.style.display = 'block';
+  resultText.textContent = '';
+
+  let i = 0;
+  const chars = prompt.split('');
+  const speed = prompt.length > 300 ? 8 : 15;
+
+  function type() {
+    if (i < chars.length) {
+      resultText.textContent += chars[i];
+      i++;
+      setTimeout(type, speed);
+    }
+  }
+  type();
+
+  resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function copyResult() {
+  navigator.clipboard.writeText(currentPrompt).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✅ COPIED!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 COPY PROMPT'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function saveToHistory() {
+  const topic = document.getElementById('topicInput').value.trim();
+  if (!topic || !currentPrompt) return;
+  const item = { topic, cat: currentCat, prompt: currentPrompt, date: new Date().toLocaleDateString() };
+  history.unshift(item);
+  if (history.length > 10) history.pop();
+  localStorage.setItem('alpha1_prompts', JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory() {
+  const section = document.getElementById('historySection');
+  const list = document.getElementById('historyList');
+  if (history.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = history.map((item, i) => `
+    <div class="history-item" onclick="loadHistory(${i})">
+      <div class="h-cat">${item.cat.toUpperCase()} · ${item.date}</div>
+      ${item.topic}
+    </div>`).join('');
+}
+
+function loadHistory(index) {
+  const item = history[index];
+  document.getElementById('topicInput').value = item.topic;
+  currentCat = item.cat;
+  currentPrompt = item.prompt;
+  document.querySelectorAll('.cat-pill').forEach(p => {
+    p.classList.toggle('active', p.textContent.toLowerCase().includes(item.cat));
+  });
+  document.getElementById('resultCard').style.display = 'block';
+  document.getElementById('resultText').textContent = item.prompt;
+}
+
+function clearHistory() {
+  history = [];
+  localStorage.removeItem('alpha1_prompts');
+  renderHistory();
+}
+
+renderHistory();
+</script>
+</body>
+</html>
