@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Profile — Studentin</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f6f3;--surface:#ffffff;--border:#e8e4dc;--text:#0f0e0c;--text2:#6b6558;--text3:#aaa69d;--accent:#1a56db;--accent2:#0ea5e9;--accent3:#7c3aed;--green:#059669;--shadow:0 4px 24px rgba(15,14,12,.07);--shadow-lg:0 20px 60px rgba(15,14,12,.12);}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Geist',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:1000;}
+
+/* NAV */
+nav{padding:0 5vw;height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(247,246,243,.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.logo{font-family:'Instrument Serif',serif;font-size:22px;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:8px;}
+.logo-mark{width:28px;height:28px;background:var(--text);border-radius:7px;display:flex;align-items:center;justify-content:center;}
+.logo-mark svg{width:16px;height:16px;}
+.nav-back{font-size:13px;color:var(--text2);text-decoration:none;display:flex;align-items:center;gap:6px;font-weight:500;}
+.nav-back:hover{color:var(--text);}
+
+/* LAYOUT */
+.page{max-width:680px;margin:0 auto;padding:40px 5vw 80px;}
+
+/* PROGRESS */
+.progress-wrap{margin-bottom:40px;}
+.progress-steps{display:flex;align-items:center;gap:0;margin-bottom:12px;}
+.step{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;position:relative;}
+.step:not(:last-child)::after{content:'';position:absolute;top:16px;left:60%;width:80%;height:2px;background:var(--border);z-index:0;}
+.step.done:not(:last-child)::after{background:var(--accent);}
+.step-circle{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text3);background:var(--surface);position:relative;z-index:1;transition:all .3s;}
+.step.active .step-circle{border-color:var(--accent);color:var(--accent);background:rgba(26,86,219,.06);}
+.step.done .step-circle{border-color:var(--accent);background:var(--accent);color:#fff;}
+.step-label{font-size:10px;font-weight:500;color:var(--text3);text-align:center;}
+.step.active .step-label{color:var(--accent);font-weight:700;}
+.step.done .step-label{color:var(--text2);}
+.progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+
+/* FORM */
+.form-section{display:none;}
+.form-section.active{display:block;}
+.form-title{font-family:'Instrument Serif',serif;font-size:32px;letter-spacing:-.02em;margin-bottom:6px;}
+.form-sub{font-size:15px;color:var(--text2);font-weight:300;margin-bottom:32px;line-height:1.6;}
+.form-group{margin-bottom:20px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:7px;color:var(--text);}
+.required{color:#ef4444;}
+input,select,textarea{width:100%;padding:12px 16px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;font-family:'Geist',sans-serif;font-size:14px;color:var(--text);outline:none;transition:all .2s;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,86,219,.08);}
+input::placeholder,textarea::placeholder{color:var(--text3);}
+textarea{resize:vertical;min-height:100px;line-height:1.6;}
+.input-hint{font-size:11px;color:var(--text3);margin-top:5px;}
+.char-count{font-size:11px;color:var(--text3);text-align:right;margin-top:4px;}
+
+/* PHOTO UPLOAD */
+.photo-upload{display:flex;align-items:center;gap:20px;margin-bottom:28px;}
+.photo-preview{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent3));display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#fff;font-family:'Instrument Serif',serif;flex-shrink:0;position:relative;overflow:hidden;cursor:pointer;}
+.photo-preview img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.photo-preview-overlay{position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;border-radius:50%;}
+.photo-preview:hover .photo-preview-overlay{opacity:1;}
+.photo-preview-overlay span{font-size:20px;}
+.photo-info{flex:1;}
+.photo-title{font-size:14px;font-weight:600;margin-bottom:4px;}
+.photo-sub{font-size:12px;color:var(--text3);margin-bottom:12px;}
+.upload-btn{padding:8px 18px;border-radius:100px;font-size:13px;font-weight:600;background:none;color:var(--accent);border:1.5px solid rgba(26,86,219,.3);cursor:pointer;font-family:'Geist',sans-serif;transition:all .2s;}
+.upload-btn:hover{background:rgba(26,86,219,.06);}
+
+/* INSTITUTION SEARCH */
+.inst-search-wrap{position:relative;}
+.inst-input{padding-left:40px !important;}
+.inst-search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;z-index:1;}
+.inst-dropdown{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;box-shadow:var(--shadow-lg);z-index:50;max-height:280px;overflow-y:auto;display:none;}
+.inst-dropdown.open{display:block;}
+.inst-item{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;transition:background .15s;border-bottom:1px solid var(--border);}
+.inst-item:last-child{border-bottom:none;}
+.inst-item:hover{background:rgba(26,86,219,.04);}
+.inst-logo{width:36px;height:36px;border-radius:8px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.inst-name{font-size:13px;font-weight:600;}
+.inst-meta{font-size:11px;color:var(--text3);}
+.inst-type{padding:2px 7px;border-radius:100px;font-size:9px;font-weight:700;margin-left:auto;flex-shrink:0;}
+.type-uni{background:rgba(26,86,219,.08);color:var(--accent);}
+.type-school{background:rgba(5,150,105,.08);color:var(--green);}
+.type-college{background:rgba(124,58,237,.08);color:var(--accent3);}
+
+/* TAGS INPUT */
+.tags-wrap{display:flex;flex-wrap:wrap;gap:8px;padding:10px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;min-height:48px;cursor:text;transition:border-color .2s;}
+.tags-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,86,219,.08);}
+.tag-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(26,86,219,.08);border-radius:100px;font-size:12px;font-weight:600;color:var(--accent);}
+.tag-chip button{background:none;border:none;cursor:pointer;color:var(--accent);font-size:14px;line-height:1;padding:0;}
+.tag-input-inner{border:none;outline:none;font-family:'Geist',sans-serif;font-size:13px;color:var(--text);background:none;min-width:120px;flex:1;}
+.tag-suggestions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.tag-sug{padding:4px 12px;border-radius:100px;font-size:12px;font-weight:500;background:var(--bg);border:1px solid var(--border);color:var(--text2);cursor:pointer;transition:all .15s;}
+.tag-sug:hover{background:rgba(26,86,219,.06);border-color:rgba(26,86,219,.2);color:var(--accent);}
+
+/* EXPERIENCE / EDUCATION ITEMS */
+.exp-item-form{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:12px;position:relative;}
+.exp-item-form .remove-btn{position:absolute;top:12px;right:12px;width:24px;height:24px;border-radius:50%;background:none;border:1px solid var(--border);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text3);transition:all .15s;}
+.exp-item-form .remove-btn:hover{background:#fee2e2;color:#ef4444;border-color:#fecaca;}
+.add-more-btn{width:100%;padding:12px;border-radius:12px;border:1.5px dashed var(--border);background:none;font-family:'Geist',sans-serif;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.add-more-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(26,86,219,.03);}
+
+/* CERT ITEM */
+.cert-item{display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;}
+.cert-icon{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent3));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.cert-body{flex:1;}
+.cert-name{font-size:13px;font-weight:700;}
+.cert-issuer{font-size:11px;color:var(--text3);}
+
+/* RADIO CARDS */
+.radio-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.radio-card{padding:16px;border:1.5px solid var(--border);border-radius:12px;cursor:pointer;transition:all .2s;position:relative;}
+.radio-card:hover{border-color:rgba(26,86,219,.3);}
+.radio-card.selected{border-color:var(--accent);background:rgba(26,86,219,.04);}
+.radio-card input{position:absolute;opacity:0;}
+.rc-icon{font-size:24px;margin-bottom:8px;}
+.rc-title{font-size:14px;font-weight:700;margin-bottom:3px;}
+.rc-sub{font-size:12px;color:var(--text3);}
+.rc-check{position:absolute;top:12px;right:12px;width:18px;height:18px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .2s;}
+.radio-card.selected .rc-check{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+/* NAVIGATION BUTTONS */
+.form-nav{display:flex;justify-content:space-between;align-items:center;margin-top:36px;padding-top:24px;border-top:1px solid var(--border);}
+.btn-back{padding:12px 28px;border-radius:100px;font-family:'Geist',sans-serif;font-size:14px;font-weight:600;background:none;color:var(--text2);border:1.5px solid var(--border);cursor:pointer;transition:all .2s;}
+.btn-back:hover{background:var(--bg);}
+.btn-next{padding:12px 32px;border-radius:100px;font-family:'Geist',sans-serif;font-size:14px;font-weight:600;background:var(--text);color:#fff;border:none;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;}
+.btn-next:hover{background:#2a2825;transform:translateY(-1px);box-shadow:0 6px 20px rgba(15,14,12,.2);}
+.btn-finish{background:linear-gradient(135deg,var(--accent),var(--accent3));padding:14px 40px;}
+.btn-finish:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(26,86,219,.3);}
+.step-indicator{font-size:13px;color:var(--text3);}
+
+/* SUCCESS */
+.success-screen{text-align:center;padding:60px 20px;display:none;}
+.success-screen.active{display:block;}
+.success-icon{font-size:72px;margin-bottom:24px;animation:bounceIn .6s ease;}
+@keyframes bounceIn{0%{transform:scale(0)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+.success-title{font-family:'Instrument Serif',serif;font-size:42px;letter-spacing:-.02em;margin-bottom:12px;}
+.success-sub{font-size:16px;color:var(--text2);font-weight:300;line-height:1.7;max-width:400px;margin:0 auto 36px;}
+.success-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.btn-primary{padding:13px 32px;border-radius:100px;font-family:'Geist',sans-serif;font-size:14px;font-weight:600;background:var(--accent);color:#fff;border:none;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;}
+.btn-primary:hover{background:#1648c5;}
+.btn-secondary{padding:13px 32px;border-radius:100px;font-family:'Geist',sans-serif;font-size:14px;font-weight:600;background:none;color:var(--text);border:1.5px solid var(--border);cursor:pointer;text-decoration:none;display:inline-flex;}
+.btn-secondary:hover{background:var(--bg);}
+
+/* PROFILE TYPE BANNER */
+.type-banner{padding:14px 18px;border-radius:12px;display:flex;align-items:center;gap:12px;margin-bottom:24px;font-size:13px;font-weight:500;}
+.type-banner.school{background:rgba(5,150,105,.06);border:1px solid rgba(5,150,105,.15);color:var(--green);}
+.type-banner.university{background:rgba(26,86,219,.06);border:1px solid rgba(26,86,219,.15);color:var(--accent);}
+
+@media(max-width:600px){.form-row{grid-template-columns:1fr;}.radio-cards{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="index.html">
+    <div class="logo-mark"><svg viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="white" stroke-width="1.5"/><path d="M3 9 Q9 3 15 9 Q9 15 3 9Z" fill="white" opacity=".7"/></svg></div>
+    Studentin
+  </a>
+  <a class="nav-back" href="index.html">← Back to home</a>
+</nav>
+
+<div class="page">
+  <!-- PROGRESS -->
+  <div class="progress-wrap">
+    <div class="progress-steps">
+      <div class="step active" id="step-ind-1"><div class="step-circle">1</div><div class="step-label">You</div></div>
+      <div class="step" id="step-ind-2"><div class="step-circle">2</div><div class="step-label">Education</div></div>
+      <div class="step" id="step-ind-3"><div class="step-circle">3</div><div class="step-label">Skills</div></div>
+      <div class="step" id="step-ind-4"><div class="step-circle">4</div><div class="step-label">Experience</div></div>
+      <div class="step" id="step-ind-5"><div class="step-circle">5</div><div class="step-label">Finalize</div></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:20%"></div></div>
+  </div>
+
+  <!-- STEP 1: BASIC INFO -->
+  <div class="form-section active" id="section-1">
+    <div class="form-title">Let's start with you 👋</div>
+    <div class="form-sub">Tell us the basics — this is how others will find you on Studentin.</div>
+
+    <!-- Profile Photo -->
+    <div class="photo-upload">
+      <div class="photo-preview" id="photoPreview" onclick="document.getElementById('photoInput').click()">
+        <span id="photoInitial">R</span>
+        <div class="photo-preview-overlay"><span>📷</span></div>
+        <img id="photoImg" style="display:none;">
+      </div>
+      <div class="photo-info">
+        <div class="photo-title">Profile Photo</div>
+        <div class="photo-sub">JPG, PNG or GIF · Max 5MB<br>A real photo gets 5x more connections!</div>
+        <button class="upload-btn" onclick="document.getElementById('photoInput').click()">Upload photo</button>
+        <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="previewPhoto(this)">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>First Name <span class="required">*</span></label>
+        <input type="text" id="firstName" placeholder="Rahul" oninput="updateInitial()">
+      </div>
+      <div class="form-group">
+        <label>Last Name <span class="required">*</span></label>
+        <input type="text" id="lastName" placeholder="Kumar">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Age <span class="required">*</span></label>
+        <select id="age">
+          <option value="">Select age</option>
+          <option>13</option><option>14</option><option>15</option><option>16</option>
+          <option>17</option><option>18</option><option>19</option><option>20</option>
+          <option>21</option><option>22</option><option>23</option><option>24</option>
+          <option>25</option><option>26+</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Gender</label>
+        <select id="gender">
+          <option value="">Prefer not to say</option>
+          <option>Male</option><option>Female</option><option>Non-binary</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Headline <span class="required">*</span></label>
+      <input type="text" id="headline" placeholder="e.g. B.Tech CSE @ IIT Bombay · Builder · Open to Internships" maxlength="120" oninput="updateCharCount(this,'headlineCount')">
+      <div class="char-count"><span id="headlineCount">0</span>/120</div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>City <span class="required">*</span></label>
+        <input type="text" id="city" placeholder="Mumbai">
+      </div>
+      <div class="form-group">
+        <label>Country <span class="required">*</span></label>
+        <select id="country">
+          <option value="">Select country</option>
+          <option>India</option><option>United States</option><option>United Kingdom</option>
+          <option>Japan</option><option>France</option><option>Germany</option>
+          <option>Australia</option><option>Canada</option><option>Brazil</option>
+          <option>Nigeria</option><option>South Korea</option><option>Singapore</option>
+          <option>UAE</option><option>Mexico</option><option>Bangladesh</option>
+          <option>Pakistan</option><option>Indonesia</option><option>China</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>About You</label>
+      <textarea id="about" placeholder="Tell the world who you are — what you're building, what you're passionate about, and what you're looking for..." maxlength="500" oninput="updateCharCount(this,'aboutCount')"></textarea>
+      <div class="char-count"><span id="aboutCount">0</span>/500</div>
+    </div>
+
+    <!-- Profile Type -->
+    <div class="form-group">
+      <label>I am currently a <span class="required">*</span></label>
+      <div class="radio-cards">
+        <div class="radio-card selected" id="rc-school" onclick="selectType('school')">
+          <div class="rc-check">✓</div>
+          <div class="rc-icon">🏫</div>
+          <div class="rc-title">School Student</div>
+          <div class="rc-sub">Grade 6–12 · High School</div>
+        </div>
+        <div class="radio-card" id="rc-university" onclick="selectType('university')">
+          <div class="rc-check"></div>
+          <div class="rc-icon">🎓</div>
+          <div class="rc-title">University Student</div>
+          <div class="rc-sub">UG · PG · PhD · Diploma</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-nav">
+      <div class="step-indicator">Step 1 of 5</div>
+      <button class="btn-next" onclick="nextStep(1)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: EDUCATION -->
+  <div class="form-section" id="section-2">
+    <div id="edu-type-banner"></div>
+    <div class="form-title">Your education 🎓</div>
+    <div class="form-sub">Add your school, college or university. You can add multiple institutions.</div>
+
+    <div id="edu-items">
+      <div class="exp-item-form" id="edu-0">
+        <button class="remove-btn" onclick="removeItem('edu-0')" style="display:none;">×</button>
+        <div class="form-group">
+          <label>Institution Name <span class="required">*</span></label>
+          <div class="inst-search-wrap">
+            <span class="inst-search-icon">🔍</span>
+            <input type="text" class="inst-input" placeholder="Search your school or university..." oninput="searchInstitution(this)" autocomplete="off">
+            <div class="inst-dropdown" id="inst-dropdown-0"></div>
+          </div>
+          <div class="input-hint">Start typing to search from 50,000+ institutions worldwide</div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Degree / Grade Level <span class="required">*</span></label>
+            <select class="edu-degree">
+              <optgroup label="School">
+                <option>Grade 6</option><option>Grade 7</option><option>Grade 8</option>
+                <option>Grade 9</option><option>Grade 10</option><option>Grade 11</option>
+                <option>Grade 12 / Senior Year</option>
+              </optgroup>
+              <optgroup label="University">
+                <option>B.Tech / B.E.</option><option>B.Sc</option><option>B.A.</option>
+                <option>B.Com</option><option>BBA</option><option>B.Arch</option>
+                <option>MBBS</option><option>LLB</option><option>B.Design</option>
+                <option>M.Tech / M.E.</option><option>M.Sc</option><option>MBA</option>
+                <option>MCA</option><option>PhD</option><option>Diploma</option>
+                <option>Other</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Field of Study</label>
+            <input type="text" class="edu-field" placeholder="e.g. Computer Science, PCM, Commerce">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Start Year <span class="required">*</span></label>
+            <select class="edu-start"></select>
+          </div>
+          <div class="form-group">
+            <label>End Year (or Expected)</label>
+            <select class="edu-end"></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Grade / CGPA / Percentage</label>
+          <input type="text" class="edu-grade" placeholder="e.g. 9.2 CGPA, 94.5%, First Division">
+        </div>
+        <div class="form-group">
+          <label>Activities & Societies</label>
+          <input type="text" class="edu-activities" placeholder="e.g. Coding Club, Student Council, Cricket Team, NSS">
+        </div>
+      </div>
+    </div>
+
+    <button class="add-more-btn" onclick="addEduItem()">+ Add another institution</button>
+
+    <div class="form-nav">
+      <button class="btn-back" onclick="prevStep(2)">← Back</button>
+      <div class="step-indicator">Step 2 of 5</div>
+      <button class="btn-next" onclick="nextStep(2)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: SKILLS -->
+  <div class="form-section" id="section-3">
+    <div class="form-title">Your skills & interests 💡</div>
+    <div class="form-sub">What are you good at? Add skills, tools, languages, and interests. Be honest — this helps you get found!</div>
+
+    <div class="form-group">
+      <label>Technical Skills</label>
+      <div class="tags-wrap" id="tech-tags" onclick="document.getElementById('tech-input').focus()">
+        <input type="text" id="tech-input" class="tag-input-inner" placeholder="Type a skill and press Enter..." onkeydown="addTag(event,'tech-tags','tech-input')">
+      </div>
+      <div class="tag-suggestions">
+        <span class="tag-sug" onclick="addTagDirect('tech-tags','tech-input','Python')">Python</span>
+        <span class="tag-sug" onclick="addTagDirect('tech-tags','tech-input','JavaScript')">JavaScript</span>
+        <span class="tag-sug" onclick="addTagDirect('tech-tags','tech-input','React')">React</span>
+        <span class="tag-sug" onclick="addTagDirect('tech-tags','tech-input','Machine Learning')">Machine Learning</span>
+        <span class="tag-sug" onclick="addTagDirect('tech-tags','tech-input','C++')">C++</span>
+        <span class="tag-sug" onclick="addTagDirect('tech-tags','tech-input','Java')">Java</span>
+        <span class="tag-sug" onclick="addTagDirect('tech-tags','tech-input','Data Science')">Data Science</span>
+        <span class="tag-sug" onclick="addTagDirect('tech-tags','tech-input','Node.js')">Node.js</span>
+        <span class="tag-sug" onclick="addTagDirect('tech-tags','tech-input','SQL')">SQL</span>
+        <span class="tag-sug" onclick="addTagDirect('tech-tags','tech-input','UI/UX Design')">UI/UX Design</span>
+        <span class="tag-sug" onclick="addTagDirect('tech-tags','tech-input','Figma')">Figma</span>
+        <span class="tag-sug" onclick="addTagDirect('tech-tags','tech-input','Android Dev')">Android Dev</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Soft Skills</label>
+      <div class="tags-wrap" id="soft-tags" onclick="document.getElementById('soft-input').focus()">
+        <input type="text" id="soft-input" class="tag-input-inner" placeholder="e.g. Leadership, Public Speaking..." onkeydown="addTag(event,'soft-tags','soft-input')">
+      </div>
+      <div class="tag-suggestions">
+        <span class="tag-sug" onclick="addTagDirect('soft-tags','soft-input','Leadership')">Leadership</span>
+        <span class="tag-sug" onclick="addTagDirect('soft-tags','soft-input','Public Speaking')">Public Speaking</span>
+        <span class="tag-sug" onclick="addTagDirect('soft-tags','soft-input','Teamwork')">Teamwork</span>
+        <span class="tag-sug" onclick="addTagDirect('soft-tags','soft-input','Problem Solving')">Problem Solving</span>
+        <span class="tag-sug" onclick="addTagDirect('soft-tags','soft-input','Communication')">Communication</span>
+        <span class="tag-sug" onclick="addTagDirect('soft-tags','soft-input','Critical Thinking')">Critical Thinking</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Languages</label>
+      <div class="tags-wrap" id="lang-tags" onclick="document.getElementById('lang-input').focus()">
+        <input type="text" id="lang-input" class="tag-input-inner" placeholder="e.g. Hindi, English, French..." onkeydown="addTag(event,'lang-tags','lang-input')">
+      </div>
+      <div class="tag-suggestions">
+        <span class="tag-sug" onclick="addTagDirect('lang-tags','lang-input','English')">English</span>
+        <span class="tag-sug" onclick="addTagDirect('lang-tags','lang-input','Hindi')">Hindi</span>
+        <span class="tag-sug" onclick="addTagDirect('lang-tags','lang-input','French')">French</span>
+        <span class="tag-sug" onclick="addTagDirect('lang-tags','lang-input','Spanish')">Spanish</span>
+        <span class="tag-sug" onclick="addTagDirect('lang-tags','lang-input','Japanese')">Japanese</span>
+        <span class="tag-sug" onclick="addTagDirect('lang-tags','lang-input','Arabic')">Arabic</span>
+        <span class="tag-sug" onclick="addTagDirect('lang-tags','lang-input','Mandarin')">Mandarin</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Interests & Hobbies</label>
+      <div class="tags-wrap" id="interest-tags" onclick="document.getElementById('interest-input').focus()">
+        <input type="text" id="interest-input" class="tag-input-inner" placeholder="e.g. Hackathons, Chess, Photography..." onkeydown="addTag(event,'interest-tags','interest-input')">
+      </div>
+      <div class="tag-suggestions">
+        <span class="tag-sug" onclick="addTagDirect('interest-tags','interest-input','Hackathons')">Hackathons</span>
+        <span class="tag-sug" onclick="addTagDirect('interest-tags','interest-input','Open Source')">Open Source</span>
+        <span class="tag-sug" onclick="addTagDirect('interest-tags','interest-input','Startups')">Startups</span>
+        <span class="tag-sug" onclick="addTagDirect('interest-tags','interest-input','Chess')">Chess</span>
+        <span class="tag-sug" onclick="addTagDirect('interest-tags','interest-input','Reading')">Reading</span>
+        <span class="tag-sug" onclick="addTagDirect('interest-tags','interest-input','Photography')">Photography</span>
+        <span class="tag-sug" onclick="addTagDirect('interest-tags','interest-input','Gaming')">Gaming</span>
+        <span class="tag-sug" onclick="addTagDirect('interest-tags','interest-input','Music')">Music</span>
+      </div>
+    </div>
+
+    <!-- Certificates -->
+    <div class="form-group">
+      <label>Certifications & Courses</label>
+      <div id="cert-items"></div>
+      <button class="add-more-btn" onclick="addCertItem()" style="margin-top:8px;">+ Add certification or course</button>
+    </div>
+
+    <div class="form-nav">
+      <button class="btn-back" onclick="prevStep(3)">← Back</button>
+      <div class="step-indicator">Step 3 of 5</div>
+      <button class="btn-next" onclick="nextStep(3)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: EXPERIENCE & PROJECTS -->
+  <div class="form-section" id="section-4">
+    <div class="form-title">Experience & projects 🚀</div>
+    <div class="form-sub">Add internships, part-time jobs, volunteering, or personal projects. Even school projects count!</div>
+
+    <!-- Experience -->
+    <div class="form-group">
+      <label style="font-size:15px;font-weight:700;">Work Experience</label>
+      <div id="exp-items">
+        <div class="exp-item-form" id="exp-0">
+          <button class="remove-btn" onclick="removeItem('exp-0')" style="display:none;">×</button>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Role / Title <span class="required">*</span></label>
+              <input type="text" placeholder="e.g. Software Intern, Content Writer">
+            </div>
+            <div class="form-group">
+              <label>Company / Organization <span class="required">*</span></label>
+              <input type="text" placeholder="e.g. Razorpay, NGO, Startup">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Employment Type</label>
+              <select>
+                <option>Internship</option><option>Part-time</option><option>Full-time</option>
+                <option>Freelance</option><option>Volunteer</option><option>Self-employed</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Location</label>
+              <input type="text" placeholder="City or Remote">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Start Date</label>
+              <input type="month">
+            </div>
+            <div class="form-group">
+              <label>End Date</label>
+              <input type="month" placeholder="Leave empty if current">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea placeholder="What did you do? What did you build? What impact did you make?" style="min-height:80px;"></textarea>
+          </div>
+        </div>
+      </div>
+      <button class="add-more-btn" onclick="addExpItem()">+ Add another experience</button>
+    </div>
+
+    <!-- Projects -->
+    <div class="form-group" style="margin-top:28px;">
+      <label style="font-size:15px;font-weight:700;">Projects</label>
+      <div id="proj-items">
+        <div class="exp-item-form" id="proj-0">
+          <button class="remove-btn" onclick="removeItem('proj-0')" style="display:none;">×</button>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Project Name <span class="required">*</span></label>
+              <input type="text" placeholder="e.g. StudyBuddy, Portfolio Website">
+            </div>
+            <div class="form-group">
+              <label>Project URL</label>
+              <input type="url" placeholder="https://github.com/... or live link">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Tech Stack / Tools Used</label>
+            <input type="text" placeholder="e.g. React, Python, Firebase, Figma">
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea placeholder="What problem does it solve? How many users? Any awards?" style="min-height:80px;"></textarea>
+          </div>
+        </div>
+      </div>
+      <button class="add-more-btn" onclick="addProjItem()">+ Add another project</button>
+    </div>
+
+    <!-- Achievements -->
+    <div class="form-group" style="margin-top:28px;">
+      <label style="font-size:15px;font-weight:700;">Achievements & Awards</label>
+      <div id="ach-items">
+        <div class="exp-item-form" id="ach-0">
+          <button class="remove-btn" onclick="removeItem('ach-0')" style="display:none;">×</button>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Achievement Title</label>
+              <input type="text" placeholder="e.g. Won Smart India Hackathon 2024">
+            </div>
+            <div class="form-group">
+              <label>Year</label>
+              <select id="ach-year-0"></select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <input type="text" placeholder="Brief description — level, prize, rank, etc.">
+          </div>
+        </div>
+      </div>
+      <button class="add-more-btn" onclick="addAchItem()">+ Add another achievement</button>
+    </div>
+
+    <div class="form-nav">
+      <button class="btn-back" onclick="prevStep(4)">← Back</button>
+      <div class="step-indicator">Step 4 of 5</div>
+      <button class="btn-next" onclick="nextStep(4)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: FINALIZE -->
+  <div class="form-section" id="section-5">
+    <div class="form-title">Almost there! 🎉</div>
+    <div class="form-sub">Last few things to set up your Studentin presence.</div>
+
+    <div class="form-group">
+      <label>Username <span class="required">*</span></label>
+      <div style="position:relative;">
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;">studentin.app/</span>
+        <input type="text" id="username" placeholder="yourname" style="padding-left:120px;" oninput="checkUsername(this)">
+      </div>
+      <div class="input-hint" id="username-hint">3-30 characters · letters, numbers, underscores only</div>
+    </div>
+
+    <div class="form-group">
+      <label>Links</label>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:18px;width:24px;">🔗</span><input type="url" placeholder="LinkedIn URL (optional)"></div>
+        <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:18px;width:24px;">🐙</span><input type="url" placeholder="GitHub URL (optional)"></div>
+        <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:18px;width:24px;">🌐</span><input type="url" placeholder="Portfolio / Website URL (optional)"></div>
+        <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:18px;width:24px;">🐦</span><input type="text" placeholder="Twitter / X handle (optional)"></div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Open to</label>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <label style="display:flex;align-items:center;gap:10px;font-weight:400;cursor:pointer;"><input type="checkbox" checked style="width:auto;accent-color:var(--accent);"> Internship opportunities</label>
+        <label style="display:flex;align-items:center;gap:10px;font-weight:400;cursor:pointer;"><input type="checkbox" checked style="width:auto;accent-color:var(--accent);"> Hackathon teammates</label>
+        <label style="display:flex;align-items:center;gap:10px;font-weight:400;cursor:pointer;"><input type="checkbox" checked style="width:auto;accent-color:var(--accent);"> Project collaborations</label>
+        <label style="display:flex;align-items:center;gap:10px;font-weight:400;cursor:pointer;"><input type="checkbox" style="width:auto;accent-color:var(--accent);"> Mentorship (as mentor)</label>
+        <label style="display:flex;align-items:center;gap:10px;font-weight:400;cursor:pointer;"><input type="checkbox" checked style="width:auto;accent-color:var(--accent);"> Networking & connections</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Profile Visibility</label>
+      <select>
+        <option>Public — anyone can find me</option>
+        <option>Students only — only Studentin users</option>
+        <option>Connections only — only my connections</option>
+      </select>
+    </div>
+
+    <!-- Summary preview -->
+    <div style="background:rgba(26,86,219,.04);border:1.5px solid rgba(26,86,219,.12);border-radius:16px;padding:20px;margin-top:8px;">
+      <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:12px;">📋 Profile Preview</div>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent3));display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;" id="previewAv">R</div>
+        <div>
+          <div style="font-size:15px;font-weight:700;" id="previewName">Rahul Kumar</div>
+          <div style="font-size:12px;color:var(--text2);" id="previewHeadline">Your headline will appear here</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-nav">
+      <button class="btn-back" onclick="prevStep(5)">← Back</button>
+      <div class="step-indicator">Step 5 of 5</div>
+      <button class="btn-next btn-finish" onclick="finishProfile()">Create Profile 🚀</button>
+    </div>
+  </div>
+
+  <!-- SUCCESS SCREEN -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">You're on Studentin!</div>
+    <div class="success-sub">Your profile is live. Start connecting with students from around the world, showcase your work, and build your future.</div>
+    <div class="success-btns">
+      <a href="feed.html" class="btn-primary">Go to Feed →</a>
+      <a href="profile.html" class="btn-secondary">View My Profile</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---- INSTITUTIONS DATABASE ----
+const INSTITUTIONS = [
+  // India — Universities
+  {name:'IIT Bombay',location:'Mumbai, India',type:'uni',emoji:'🎓'},
+  {name:'IIT Delhi',location:'New Delhi, India',type:'uni',emoji:'🎓'},
+  {name:'IIT Madras',location:'Chennai, India',type:'uni',emoji:'🎓'},
+  {name:'IIT Kanpur',location:'Kanpur, India',type:'uni',emoji:'🎓'},
+  {name:'IIT Kharagpur',location:'Kharagpur, India',type:'uni',emoji:'🎓'},
+  {name:'IIT Roorkee',location:'Roorkee, India',type:'uni',emoji:'🎓'},
+  {name:'IIT Hyderabad',location:'Hyderabad, India',type:'uni',emoji:'🎓'},
+  {name:'NIT Trichy',location:'Trichy, India',type:'uni',emoji:'🎓'},
+  {name:'NIT Warangal',location:'Warangal, India',type:'uni',emoji:'🎓'},
+  {name:'BITS Pilani',location:'Pilani, India',type:'uni',emoji:'🎓'},
+  {name:'BITS Goa',location:'Goa, India',type:'uni',emoji:'🎓'},
+  {name:'Delhi University',location:'Delhi, India',type:'uni',emoji:'🎓'},
+  {name:'Mumbai University',location:'Mumbai, India',type:'uni',emoji:'🎓'},
+  {name:'VIT Vellore',location:'Vellore, India',type:'uni',emoji:'🎓'},
+  {name:'Symbiosis International University',location:'Pune, India',type:'uni',emoji:'🎓'},
+  {name:'Amity University',location:'Noida, India',type:'uni',emoji:'🎓'},
+  {name:'Manipal Institute of Technology',location:'Manipal, India',type:'uni',emoji:'🎓'},
+  {name:'SRM Institute of Science',location:'Chennai, India',type:'uni',emoji:'🎓'},
+  {name:'Anna University',location:'Chennai, India',type:'uni',emoji:'🎓'},
+  {name:'Pune University',location:'Pune, India',type:'uni',emoji:'🎓'},
+  // India — Schools
+  {name:'Delhi Public School (DPS)',location:'India (Multiple)',type:'school',emoji:'🏫'},
+  {name:'Kendriya Vidyalaya (KV)',location:'India (Multiple)',type:'school',emoji:'🏫'},
+  {name:'Ryan International School',location:'India (Multiple)',type:'school',emoji:'🏫'},
+  {name:'DAV Public School',location:'India (Multiple)',type:'school',emoji:'🏫'},
+  {name:'The Cathedral & John Connon School',location:'Mumbai, India',type:'school',emoji:'🏫'},
+  {name:'La Martiniere College',location:'Lucknow, India',type:'school',emoji:'🏫'},
+  {name:'Mayo College',location:'Ajmer, India',type:'school',emoji:'🏫'},
+  {name:'Doon School',location:'Dehradun, India',type:'school',emoji:'🏫'},
+  // Global — Universities
+  {name:'MIT',location:'Cambridge, USA',type:'uni',emoji:'🎓'},
+  {name:'Harvard University',location:'Cambridge, USA',type:'uni',emoji:'🎓'},
+  {name:'Stanford University',location:'Stanford, USA',type:'uni',emoji:'🎓'},
+  {name:'UC Berkeley',location:'Berkeley, USA',type:'uni',emoji:'🎓'},
+  {name:'Caltech',location:'Pasadena, USA',type:'uni',emoji:'🎓'},
+  {name:'Carnegie Mellon University',location:'Pittsburgh, USA',type:'uni',emoji:'🎓'},
+  {name:'University of Oxford',location:'Oxford, UK',type:'uni',emoji:'🎓'},
+  {name:'University of Cambridge',location:'Cambridge, UK',type:'uni',emoji:'🎓'},
+  {name:'Imperial College London',location:'London, UK',type:'uni',emoji:'🎓'},
+  {name:'University College London',location:'London, UK',type:'uni',emoji:'🎓'},
+  {name:'ETH Zurich',location:'Zurich, Switzerland',type:'uni',emoji:'🎓'},
+  {name:'Sciences Po',location:'Paris, France',type:'uni',emoji:'🎓'},
+  {name:'Sorbonne University',location:'Paris, France',type:'uni',emoji:'🎓'},
+  {name:'University of Tokyo',location:'Tokyo, Japan',type:'uni',emoji:'🎓'},
+  {name:'Peking University',location:'Beijing, China',type:'uni',emoji:'🎓'},
+  {name:'National University of Singapore',location:'Singapore',type:'uni',emoji:'🎓'},
+  {name:'University of Toronto',location:'Toronto, Canada',type:'uni',emoji:'🎓'},
+  {name:'McGill University',location:'Montreal, Canada',type:'uni',emoji:'🎓'},
+  {name:'University of Melbourne',location:'Melbourne, Australia',type:'uni',emoji:'🎓'},
+  {name:'University of Sydney',location:'Sydney, Australia',type:'uni',emoji:'🎓'},
+  {name:'UNAM',location:'Mexico City, Mexico',type:'uni',emoji:'🎓'},
+  {name:'University of Ghana',location:'Accra, Ghana',type:'uni',emoji:'🎓'},
+  {name:'American University of Sharjah',location:'Sharjah, UAE',type:'uni',emoji:'🎓'},
+  {name:'King Saud University',location:'Riyadh, Saudi Arabia',type:'uni',emoji:'🎓'},
+  {name:'Seoul National University',location:'Seoul, South Korea',type:'uni',emoji:'🎓'},
+  {name:'KAIST',location:'Daejeon, South Korea',type:'uni',emoji:'🎓'},
+  {name:'IIT (BHU) Varanasi',location:'Varanasi, India',type:'uni',emoji:'🎓'},
+  {name:'IIIT Hyderabad',location:'Hyderabad, India',type:'uni',emoji:'🎓'},
+  // Online / Global
+  {name:'Coursera (Online)',location:'Online',type:'college',emoji:'💻'},
+  {name:'edX (Online)',location:'Online',type:'college',emoji:'💻'},
+  {name:'NPTEL',location:'Online, India',type:'college',emoji:'💻'},
+];
+
+// Populate year dropdowns
+function populateYears() {
+  const curr = new Date().getFullYear();
+  document.querySelectorAll('.edu-start,.edu-end').forEach(sel => {
+    sel.innerHTML = '<option value="">Select year</option>';
+    for(let y = curr+6; y >= 2000; y--) {
+      sel.innerHTML += `<option>${y}</option>`;
+    }
+  });
+  const achSel = document.getElementById('ach-year-0');
+  if(achSel) {
+    achSel.innerHTML = '<option value="">Year</option>';
+    for(let y = curr; y >= 2010; y--) achSel.innerHTML += `<option>${y}</option>`;
+  }
+}
+populateYears();
+
+// Institution search
+function searchInstitution(input) {
+  const idx = input.closest('.exp-item-form').id.split('-')[1];
+  const dd = document.getElementById('inst-dropdown-' + idx) || input.nextElementSibling;
+  const q = input.value.toLowerCase().trim();
+  if(q.length < 2) { dd.classList.remove('open'); return; }
+  const results = INSTITUTIONS.filter(i => i.name.toLowerCase().includes(q) || i.location.toLowerCase().includes(q)).slice(0,8);
+  if(results.length === 0) { dd.classList.remove('open'); return; }
+  dd.innerHTML = results.map(i => `
+    <div class="inst-item" onclick="selectInstitution(this,'${i.name}','${i.location}')">
+      <div class="inst-logo">${i.emoji}</div>
+      <div><div class="inst-name">${i.name}</div><div class="inst-meta">${i.location}</div></div>
+      <span class="inst-type type-${i.type}">${i.type === 'uni' ? 'University' : i.type === 'school' ? 'School' : 'Online'}</span>
+    </div>`).join('');
+  dd.classList.add('open');
+}
+
+function selectInstitution(el, name, loc) {
+  const dd = el.closest('.inst-dropdown');
+  const input = dd.previousElementSibling;
+  input.value = name;
+  dd.classList.remove('open');
+}
+
+// Close dropdowns on outside click
+document.addEventListener('click', e => {
+  if(!e.target.closest('.inst-search-wrap')) {
+    document.querySelectorAll('.inst-dropdown').forEach(d => d.classList.remove('open'));
+  }
+});
+
+// Profile type
+let profileType = 'school';
+function selectType(type) {
+  profileType = type;
+  document.querySelectorAll('.radio-card').forEach(c => { c.classList.remove('selected'); c.querySelector('.rc-check').textContent = ''; });
+  document.getElementById('rc-'+type).classList.add('selected');
+  document.getElementById('rc-'+type).querySelector('.rc-check').textContent = '✓';
+}
+
+// Step navigation
+let currentStep = 1;
+function nextStep(from) {
+  if(from === 1 && !validateStep1()) return;
+  currentStep = from + 1;
+  updateUI();
+}
+function prevStep(from) {
+  currentStep = from - 1;
+  updateUI();
+}
+
+function validateStep1() {
+  const fn = document.getElementById('firstName').value.trim();
+  const ln = document.getElementById('lastName').value.trim();
+  const age = document.getElementById('age').value;
+  const hl = document.getElementById('headline').value.trim();
+  const city = document.getElementById('city').value.trim();
+  const country = document.getElementById('country').value;
+  if(!fn || !ln) { alert('Please enter your full name!'); return false; }
+  if(!age) { alert('Please select your age!'); return false; }
+  if(!hl) { alert('Please add a headline!'); return false; }
+  if(!city || !country) { alert('Please add your location!'); return false; }
+  return true;
+}
+
+function updateUI() {
+  // Sections
+  document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('section-' + currentStep).classList.add('active');
+  // Step indicators
+  for(let i = 1; i <= 5; i++) {
+    const ind = document.getElementById('step-ind-' + i);
+    ind.classList.remove('active','done');
+    if(i < currentStep) ind.classList.add('done');
+    if(i === currentStep) ind.classList.add('active');
+    if(i < currentStep) ind.querySelector('.step-circle').textContent = '✓';
+    else ind.querySelector('.step-circle').textContent = i;
+  }
+  // Progress bar
+  document.getElementById('progressFill').style.width = (currentStep * 20) + '%';
+  // Education type banner
+  if(currentStep === 2) {
+    const banner = document.getElementById('edu-type-banner');
+    banner.className = 'type-banner ' + profileType;
+    banner.innerHTML = profileType === 'school'
+      ? '🏫 School student mode — we\'ll show school-specific options'
+      : '🎓 University student mode — full degree & course options';
+  }
+  // Update preview
+  const fn = document.getElementById('firstName').value || 'Your';
+  const ln = document.getElementById('lastName').value || 'Name';
+  const hl = document.getElementById('headline').value || 'Your headline will appear here';
+  document.getElementById('previewName').textContent = fn + ' ' + ln;
+  document.getElementById('previewHeadline').textContent = hl;
+  document.getElementById('previewAv').textContent = (fn[0] || 'Y').toUpperCase();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// Tags
+function addTag(e, wrapId, inputId) {
+  if(e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    const input = document.getElementById(inputId);
+    const val = input.value.trim().replace(/,$/,'');
+    if(val) { addTagToWrap(wrapId, val, inputId); input.value = ''; }
+  }
+}
+function addTagDirect(wrapId, inputId, val) { addTagToWrap(wrapId, val, inputId); }
+function addTagToWrap(wrapId, val, inputId) {
+  const wrap = document.getElementById(wrapId);
+  const existing = [...wrap.querySelectorAll('.tag-chip')].map(t => t.dataset.val);
+  if(existing.includes(val)) return;
+  const chip = document.createElement('div');
+  chip.className = 'tag-chip'; chip.dataset.val = val;
+  chip.innerHTML = `${val}<button onclick="this.parentElement.remove()" title="Remove">×</button>`;
+  wrap.insertBefore(chip, document.getElementById(inputId));
+}
+
+// Photo preview
+function previewPhoto(input) {
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('photoImg');
+    img.src = e.target.result; img.style.display = 'block';
+    document.getElementById('photoInitial').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+// Update initial
+function updateInitial() {
+  const fn = document.getElementById('firstName').value;
+  if(fn) document.getElementById('photoInitial').textContent = fn[0].toUpperCase();
+}
+
+// Char count
+function updateCharCount(el, countId) {
+  document.getElementById(countId).textContent = el.value.length;
+}
+
+// Add items
+let eduCount = 1, expCount = 1, projCount = 1, achCount = 1, certCount = 0;
+
+function addEduItem() {
+  const id = 'edu-' + eduCount++;
+  const div = document.createElement('div');
+  div.className = 'exp-item-form'; div.id = id;
+  div.innerHTML = `
+    <button class="remove-btn" onclick="removeItem('${id}')">×</button>
+    <div class="form-group"><label>Institution Name</label>
+      <div class="inst-search-wrap">
+        <span class="inst-search-icon">🔍</span>
+        <input type="text" class="inst-input" placeholder="Search your school or university..." oninput="searchInstitution(this)" autocomplete="off">
+        <div class="inst-dropdown" id="inst-dropdown-${eduCount}"></div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Degree / Grade Level</label>
+        <select class="edu-degree">
+          <optgroup label="School"><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option></optgroup>
+          <optgroup label="University"><option>B.Tech/B.E.</option><option>B.Sc</option><option>B.A.</option><option>MBA</option><option>M.Tech</option><option>PhD</option><option>Diploma</option></optgroup>
+        </select>
+      </div>
+      <div class="form-group"><label>Field of Study</label><input type="text" class="edu-field" placeholder="e.g. Computer Science"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Start Year</label><select class="edu-start"></select></div>
+      <div class="form-group"><label>End Year</label><select class="edu-end"></select></div>
+    </div>
+    <div class="form-group"><label>Grade / CGPA</label><input type="text" class="edu-grade" placeholder="e.g. 9.2 CGPA"></div>`;
+  document.getElementById('edu-items').appendChild(div);
+  populateYears();
+}
+
+function addExpItem() {
+  const id = 'exp-' + expCount++;
+  const div = document.createElement('div');
+  div.className = 'exp-item-form'; div.id = id;
+  div.innerHTML = `
+    <button class="remove-btn" onclick="removeItem('${id}')">×</button>
+    <div class="form-row">
+      <div class="form-group"><label>Role / Title</label><input type="text" placeholder="e.g. Software Intern"></div>
+      <div class="form-group"><label>Company</label><input type="text" placeholder="e.g. Razorpay"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Type</label><select><option>Internship</option><option>Part-time</option><option>Freelance</option><option>Volunteer</option></select></div>
+      <div class="form-group"><label>Location</label><input type="text" placeholder="City or Remote"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Start</label><input type="month"></div>
+      <div class="form-group"><label>End</label><input type="month"></div>
+    </div>
+    <div class="form-group"><label>Description</label><textarea placeholder="What did you do?" style="min-height:70px;"></textarea></div>`;
+  document.getElementById('exp-items').appendChild(div);
+}
+
+function addProjItem() {
+  const id = 'proj-' + projCount++;
+  const div = document.createElement('div');
+  div.className = 'exp-item-form'; div.id = id;
+  div.innerHTML = `
+    <button class="remove-btn" onclick="removeItem('${id}')">×</button>
+    <div class="form-row">
+      <div class="form-group"><label>Project Name</label><input type="text" placeholder="e.g. My App"></div>
+      <div class="form-group"><label>Project URL</label><input type="url" placeholder="https://github.com/..."></div>
+    </div>
+    <div class="form-group"><label>Tech Stack</label><input type="text" placeholder="e.g. React, Python"></div>
+    <div class="form-group"><label>Description</label><textarea placeholder="What does it do?" style="min-height:70px;"></textarea></div>`;
+  document.getElementById('proj-items').appendChild(div);
+}
+
+function addAchItem() {
+  const id = 'ach-' + achCount++;
+  const div = document.createElement('div');
+  div.className = 'exp-item-form'; div.id = id;
+  div.innerHTML = `
+    <button class="remove-btn" onclick="removeItem('${id}')">×</button>
+    <div class="form-row">
+      <div class="form-group"><label>Achievement</label><input type="text" placeholder="e.g. Won Hackathon 2024"></div>
+      <div class="form-group"><label>Year</label><select>${Array.from({length:16},(_,i)=>`<option>${new Date().getFullYear()-i}</option>`).join('')}</select></div>
+    </div>
+    <div class="form-group"><label>Description</label><input type="text" placeholder="Brief description"></div>`;
+  document.getElementById('ach-items').appendChild(div);
+}
+
+function addCertItem() {
+  const id = 'cert-' + certCount++;
+  const div = document.createElement('div');
+  div.className = 'exp-item-form'; div.id = id;
+  div.innerHTML = `
+    <button class="remove-btn" onclick="removeItem('${id}')">×</button>
+    <div class="form-row">
+      <div class="form-group"><label>Certificate / Course Name</label><input type="text" placeholder="e.g. AWS Certified Developer"></div>
+      <div class="form-group"><label>Issuing Organization</label><input type="text" placeholder="e.g. Amazon, Coursera, NPTEL"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Issue Date</label><input type="month"></div>
+      <div class="form-group"><label>Credential ID / URL</label><input type="text" placeholder="Optional"></div>
+    </div>`;
+  document.getElementById('cert-items').appendChild(div);
+}
+
+function removeItem(id) {
+  const el = document.getElementById(id);
+  el.style.opacity = '0'; el.style.transform = 'translateY(-8px)'; el.style.transition = 'all .25s';
+  setTimeout(() => el.remove(), 250);
+}
+
+// Username check
+function checkUsername(input) {
+  const val = input.value.toLowerCase().replace(/[^a-z0-9_]/g,'');
+  input.value = val;
+  const hint = document.getElementById('username-hint');
+  if(val.length < 3) { hint.textContent = 'Too short — minimum 3 characters'; hint.style.color = '#ef4444'; }
+  else { hint.textContent = `✓ studentin.app/${val} looks good!`; hint.style.color = 'var(--green)'; }
+}
+
+// Finish
+function finishProfile() {
+  const username = document.getElementById('username').value.trim();
+  if(!username || username.length < 3) { alert('Please choose a valid username!'); return; }
+  document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('progressFill').style.width = '100%';
+  document.querySelectorAll('.step').forEach(s => s.classList.add('done'));
+  document.getElementById('successScreen').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</HTMLEOF
+echo "done"
